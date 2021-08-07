@@ -16,8 +16,6 @@ class Text2BrainModel(nn.Module):
 
         self.tokenizer = transformers.BertTokenizer.from_pretrained(pretrained_bert_dir)
         self.encoder = transformers.BertModel.from_pretrained(pretrained_bert_dir)
-        if torch.cuda.is_available():
-          self.encoder = self.encoder.cuda()
 
         self.fc = nn.Linear(
           in_features=768,
@@ -33,9 +31,9 @@ class Text2BrainModel(nn.Module):
 
         in_mask = self._pad_mask(batch, batch_first=True)
         in_ = pad_sequence(batch, batch_first=True)
-        if torch.cuda.is_available():
-          in_ = in_.cuda()
-          in_mask = in_mask.cuda()
+        device = next(self.parameters()).device
+        in_ = in_.to(device)
+        in_mask = in_mask.to(device)
 
         _, embedding = self.encoder(in_, attention_mask=in_mask)
 
