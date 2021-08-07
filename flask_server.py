@@ -3,6 +3,7 @@ import json
 import hashlib
 from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.dialects.postgresql import JSON
 from config import Config
 
 from rq import Queue
@@ -11,6 +12,7 @@ from worker import conn
 
 import numpy as np
 import torch
+import nibabel as nib
 from models.text2brain_model import Text2BrainModel
 
 
@@ -22,6 +24,16 @@ db = SQLAlchemy(application)
 q = Queue(connection=conn)
 
 MODEL = None
+
+
+class Result(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.String())
+    saved_path = db.Column(db.String())
+
+    def __repr__(self):
+        return '<id {}>'.format(self.id)
+
 
 def to_img(model, text):
     """ Output brain image """
@@ -44,14 +56,17 @@ def to_img(model, text):
         pred_img = nib.Nifti1Image(vol_data, affine)
         nib.save(pred_img, saved_img_path)
     except Exception as err:
+        print(err)
         return {"error": str(err)}
+    print('Saving to:', saved_img_path)
 
     try:
-        result = Result(text=text, result=saved_img_path)
+        result = Result(text=text, saved_path=saved_img_path)
         db.session.add(result)
         db.session.commit()
         return result.id
-    except:
+    except Exception as err:
+        print(err)
         return {"error": "Unable to add item to database."}
 
 
@@ -59,9 +74,10 @@ def to_img(model, text):
 def start_process():
     from flask_server import to_img
     data = json.loads(request.data.decode())
+    print('Input string:', data['url_key'])
 
     job = q.enqueue_call(func=to_img,
-                         args=(MODEL, data['query']),
+                         args=(MODEL, data['url_key']),
                          result_ttl=5000)
     return job.get_id()
 
@@ -77,7 +93,7 @@ def get_results(job_key):
 
     if job.is_finished:
         data = Result.query.filter_by(id=job.result).first()
-        return jsonify(data.result)  # path to saved image
+        return jsonify([('filename', data.saved_path)])  # path to saved image
     else:
         return "Nay!", 202
 
@@ -97,7 +113,7 @@ if __name__ == '__main__':
         pretrained_bert_dir=pretrained_bert_dir,
         drop_p=0.55)
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cpu')
     state_dict = torch.load(checkpoint_file, map_location=device)['state_dict']
     MODEL.load_state_dict(state_dict)
     MODEL.eval()

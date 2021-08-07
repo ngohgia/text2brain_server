@@ -1,0 +1,134 @@
+html,
+body {
+  height: 100%;
+  background-color: #fff;
+  color: #223464;
+}
+
+body {
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.container {
+  display: block;
+  max-width: 42em;
+  padding-bottom: 5em;
+  min-height: 100vh;
+}
+
+.logo-container img {
+  height: 150px;
+  width: auto;
+}
+
+.loader {
+  height: 50px;
+  width: auto;
+}
+
+.table-container {
+  margin-bottom: 30px;
+  padding: 30px 20px;
+  border-radius: 5px;
+  border: solid 1px #ced4da; 
+}
+
+.table-container .table {
+  margin-bottom: 0;
+}
+
+.table-container .table thead th {
+  border-top: 0;
+}
+
+/*
+ * Header
+ */
+.masthead {
+  margin-bottom: 2rem;
+}
+
+.masthead-brand {
+  margin-bottom: 0;
+}
+
+.nav-masthead .nav-link {
+  padding: .25rem 0;
+  font-weight: 700;
+  color: rgba(255, 255, 255, .5);
+  background-color: transparent;
+  border-bottom: .25rem solid transparent;
+}
+
+
+.nav-masthead .nav-link:hover,
+.nav-masthead .nav-link:focus {
+  border-bottom-color: rgba(255, 255, 255, .25);
+}
+
+.nav-masthead .nav-link + .nav-link {
+  margin-left: 1rem;
+}
+
+.nav-masthead .active {
+  color: #fff;
+  border-bottom-color: #fff;
+}
+
+@media (min-width: 48em) {
+  .masthead-brand {
+    float: left;
+  }
+  .nav-masthead {
+    float: right;
+  }
+}
+
+.header {
+  font-size: 70px;
+  line-height: 72px;
+}
+
+.input-container {
+  text-align: center;
+  padding: 5em 0 1em 0;
+}
+
+.table {
+  padding: 10px;
+  border-radius: 5px;
+}
+
+/*
+ * Footer
+ */
+.mastfoot {
+  color: rgba(255, 255, 255, .5);
+}
+
+#chart {
+  overflow-y: scroll;
+}
+
+#chart {
+  background: #eee;
+  padding: 3px;
+}
+
+#chart div {
+  width: 0;
+  transition: all 1s ease-out;
+  -moz-transition: all 1s ease-out;
+  -webkit-transition: all 1s ease-out;
+}
+
+#chart div {
+  height: 30px;
+  font: 15px;
+  background-color: #006dcc;
+  text-align: right;
+  margin: 2px;
+  padding: 3px;
+  color: white;
+}
