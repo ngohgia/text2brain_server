@@ -2,61 +2,111 @@
   <head>
     <title>Giving Prof</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="../static/main.css">
-    <link rel="icon" type="image/png" href="../static/favicon.png">
-  </head>
-  <body ng-controller="GivingProfController">
-    <div class="container d-flex w-100 h-100 p-3 mx-auto flex-column">
-      <main role="main" class="inner">
-        <div class="input-container">
-          <div class="logo-container">
-            <img src="{{ url_for('static', filename='ngohgia.png') }}">
-          </div>
-          <h1 class="header">Giving Prof</h1>
-          <p class="lead">I'm trying to be helpful</p>
-          <p class="lead">
-	  <form role="form" ng-submit="getResults()">
-              <div class="form-group">
-                <div class="input-group mb-3">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text" id="basic-addon3">https://give.asia/campaign/</span>
-                  </div>
-                  <input type="text" ng-model="urlKey" name="url_key" class="form-control" id="url-box">
-                  <div class="input-group-append">
-                    <button type="submit" class="btn btn-secondary">Submit</button>
-                  </div>
-                </div>
-              </div>
-            </form>
-          </p>
-	  {% for error in errors %}
-              <p class="alert alert-danger">{{ error }}</h4>
-          {% endfor %}
-        </div>
-	<div style="text-align: center; margin-top: 20px">
-	  {% raw %}
-            <h2>Similar campaigns</h2>
-            <br>
-            <div id="results">
-              <table class="table table-striped" style="max-width: 600px;">
-                <thead>
-                  <tr>
-                    <th>Campaign URL</th>
-                    <th>Similarity score</th>
-                  </tr>
-                </thead>
-                <tbody id="searchResult"></tbody>
-                </tr>
-              </table>
-            </div>
-          {% endraw %}
-	</div>
-      </main>
-    </div>
+    <link rel="icon" type="image/ico" href="../static/favicon.ico">
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.plot.ly/plotly-1.46.1.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-sanitize.js"></script>
     <script src="{{ url_for('static', filename='main.js') }}"></script>
+    <script src="{{ url_for('static', filename='surface.js') }}"></script>
+  </head>
+
+  <body ng-controller="GivingProfController">
+    <div class="navbar">
+      <a href="/">
+        <span class="navbar__brand">
+          <img class="navbar__brand__logo" src="../static/brain_interpreter_logo.png">
+        </span>
+      </a>
+      <span class="navbar__link navbar__link--selected">Query</span>
+      <span class="navbar__link">How it works</span>
+      <span class="navbar__link navbar__link--right">Feedback</span>
+    </div>
+
+    <div class="container">
+      <div class="search">
+        <span>Predict brain activation for</span>
+	<form role="form" ng-submit="getResults()">
+          <div class="form-group">
+            <input type="text" ng-model="urlKey" name="url_key" class="search-input"></input>
+            <button type="submit" class="generate-button">
+              Generate
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+              </svg>
+            </button>
+          </div>
+        </form>
+	{% for error in errors %}
+            <p class="alert alert-danger">{{ error }}</h4>
+        {% endfor %}
+      </div>
+
+      <div class="spinner" id="spinner">
+        <div class="sk-chase">
+          <div class="sk-chase-dot"></div>
+          <div class="sk-chase-dot"></div>
+          <div class="sk-chase-dot"></div>
+          <div class="sk-chase-dot"></div>
+          <div class="sk-chase-dot"></div>
+          <div class="sk-chase-dot"></div>
+        </div>
+      </div>
+
+      <div class="placeholder" ng-show="!success">
+        <img class="placeholder__img" src="{{ url_for('static', filename='blank.webp') }}"></img>
+        <p class="placeholder__lead">Enter any query shorter than a tweet, or if you feel brainy, just give the button a try!</p>
+      </div>
+
+      <div style="display: flex">
+        <div style="text-align: center; margin-top: 20px; flex: 1">
+          <div id="lh-surface-plot"></div>
+          <div class="lh-colorbar-container">
+            <canvas id="lh-colorbar" class="colorbar" width="129" height="17"></canvas>
+            <div id="lh-colorbar-legend" class="colorbar-legend"></div>
+          </div>
+
+          <div class="control-container">
+            <select id="lh-select-kind">
+                <option value="inflated">Inflated</option>
+                <option value="pial" selected>Pial</option>
+            </select>
+            <select id="lh-select-view">
+                <option value="left" selected>view: Left</option>
+                <option value="right">view: Right</option>
+                <option value="front">view: Front</option>
+                <option value="back">view: Back</option>
+                <option value="top">view: Top</option>
+                <option value="bottom">view: Bottom</option>
+                <option value="custom">view: -</option>
+            </select>
+          </div>
+        </div>
+        <div style="text-align: center; margin-top: 20px; flex: 1; max-height: 200px">
+          <div id="rh-surface-plot" style="width: 100%"></div>
+          <div class="rh-colorbar-container">
+            <canvas id="rh-colorbar" class="colorbar" width="129" height="17"></canvas>
+            <div id="rh-colorbar-legend" class="colorbar-legend"></div>
+          </div>
+
+          <div class="control-container">
+            <select id="rh-select-kind">
+                <option value="inflated">Inflated</option>
+                <option value="pial" selected>Pial</option>
+            </select>
+            <select id="rh-select-view">
+                <option value="left">view: Left</option>
+                <option value="right" selected>view: Right</option>
+                <option value="front">view: Front</option>
+                <option value="back">view: Back</option>
+                <option value="top">view: Top</option>
+                <option value="bottom">view: Bottom</option>
+                <option value="custom">view: -</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

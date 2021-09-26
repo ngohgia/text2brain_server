@@ -1,4 +1,8 @@
 scibert_scivocab_uncased
 checkpoints
+venv
+outputs
+*.db
+*.rdb
 .DS_Store
 __pycache__

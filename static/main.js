@@ -1,13 +1,271 @@
+function decodeBase64(encoded, dtype) {
+
+    let getter = {
+        "float32": "getFloat32",
+        "int32": "getInt32"
+    }[dtype];
+
+    let arrayType = {
+        "float32": Float32Array,
+        "int32": Int32Array
+    }[dtype];
+
+    let raw = atob(encoded);
+    let buffer = new ArrayBuffer(raw.length);
+    let asIntArray = new Uint8Array(buffer);
+    for (let i = 0; i !== raw.length; i++) {
+        asIntArray[i] = raw.charCodeAt(i);
+    }
+
+    let view = new DataView(buffer);
+    let decoded = new arrayType(
+        raw.length / arrayType.BYTES_PER_ELEMENT);
+    for (let i = 0, off = 0; i !== decoded.length;
+        i++, off += arrayType.BYTES_PER_ELEMENT) {
+        decoded[i] = view[getter](off, true);
+    }
+    return decoded;
+}
+
+function getAxisConfig() {
+    let axisConfig = {
+        showgrid: false,
+        showline: false,
+        ticks: '',
+        title: '',
+        showticklabels: false,
+            zeroline: false,
+        showspikes: false,
+        spikesides: false
+    };
+
+    return axisConfig;
+}
+
+function getLighting() {
+    return {};
+}
+
+function getConfig() {
+    let config = {
+        modeBarButtonsToRemove: ["hoverClosest3d"],
+        displayLogo: false
+    };
+
+    return config;
+}
+
+function getCamera(plotDivId, viewSelectId) {
+    let view = $("#" + viewSelectId).val();
+    if (view === "custom") {
+        try {
+            return $("#" + plotDivId)[0].layout.scene.camera;
+        } catch (e) {
+            return {};
+        }
+    }
+    let cameras = {
+        "left": {eye: {x: -1.7, y: 0, z: 0},
+                    up: {x: 0, y: 0, z: 1},
+                    center: {x: 0, y: 0, z: 0}},
+        "right": {eye: {x: 1.7, y: 0, z: 0},
+                    up: {x: 0, y: 0, z: 1},
+                    center: {x: 0, y: 0, z: 0}},
+        "top": {eye: {x: 0, y: 0, z: 1.7},
+                up: {x: 0, y: 1, z: 0},
+                center: {x: 0, y: 0, z: 0}},
+        "bottom": {eye: {x: 0, y: 0, z: -1.7},
+                    up: {x: 0, y: 1, z: 0},
+                    center: {x: 0, y: 0, z: 0}},
+        "front": {eye: {x: 0, y: 1.7, z: 0},
+                    up: {x: 0, y: 0, z: 1},
+                    center: {x: 0, y: 0, z: 0}},
+        "back": {eye: {x: 0, y: -1.7, z: 0},
+                    up: {x: 0, y: 0, z: 1},
+                    center: {x: 0, y: 0, z: 0}},
+    };
+    return cameras[view];
+
+}
+
+function getLayout(plotDivId, viewSelectId, blackBg) {
+
+    let camera = getCamera(plotDivId, viewSelectId);
+    let axisConfig = getAxisConfig();
+
+    let container = $('#' + plotDivId);
+
+    let width = container.width() * .9;
+    let height = width * 2 / 3;
+
+    let layout = {
+        height: height, width: width,
+        margin: {l:0, r:0, b:0, t:0, pad:0},
+        hovermode: false,
+        paper_bgcolor: blackBg ? '#000': '#fff',
+        axis_bgcolor: '#333',
+        scene: {
+            camera: camera,
+            xaxis: axisConfig,
+            yaxis: axisConfig,
+            zaxis: axisConfig
+        }
+    };
+
+    return layout;
+
+}
+
+function updateLayout(plotDivId, viewSelectId, blackBg) {
+    let layout = getLayout(
+        plotDivId, viewSelectId, blackBg);
+    Plotly.relayout(plotDivId, layout);
+}
+
+function textColor(black_bg){
+    if (black_bg){
+        return "white";
+    }
+    return "black";
+}
+
+function addColorbar(rawColorscale, cmax, colorbarId, legendId) {
+    // hack to draw the colorbar
+    let width = 128;
+    let height = 16;
+    let cv  = document.getElementById(colorbarId);
+    cv.style.border = "solid 1px rgb(102, 102, 102)";
+    let ctx = cv.getContext('2d');
+
+    const grayColor = 'rgb(127, 127, 127)';
+    let colorscale = [];
+  
+    let firstGrayColorIdx = -1;
+    for (let i = parseInt(rawColorscale.length / 2); i < rawColorscale.length; i++) {
+      if (rawColorscale[i][1] != grayColor) {
+        colorscale.push(rawColorscale[i][1]);
+        if (firstGrayColorIdx < 0)
+          firstGrayColorIdx = i;
+      }
+    }
+    colorscaleMin = cmax * (firstGrayColorIdx - rawColorscale.length / 2) / rawColorscale.length * 2;
+    colorscaleMax = cmax;
+    colorscaleMid = (colorscaleMin + colorscaleMax) / 2;
+    let legendDiv = document.getElementById(legendId);
+    legendDiv.innerHTML  = "<div class='colorbar-legend-number colorbar-legend-number--min'>" + colorscaleMin.toFixed(2) + "</div>";
+    legendDiv.innerHTML += "<div class='colorbar-legend-number colorbar-legend-number--mid'>" + colorscaleMid.toFixed(2) + "</div>";
+    legendDiv.innerHTML += "<div class='colorbar-legend-number colorbar-legend-number--max'>" + colorscaleMax.toFixed(2) + "</div>";
+    legendDiv.style.width = width + "px";
+    legendDiv.style.height = height + "px";
+
+    step = width / colorscale.length;
+    for(let i = 0; i < colorscale.length; i++) {
+        ctx.beginPath();
+
+        let color = colorscale[i];
+        ctx.fillStyle = color;
+
+        ctx.fillRect(i * step, 0, step, 150);
+    }
+}
+
+function decodeHemisphere(surfaceInfo, surface, hemisphere){
+    let info = surfaceInfo[surface + "_" + hemisphere];
+    console.log(surfaceInfo)
+    console.log("info")
+    console.log(surface + "_" + hemisphere)
+    console.log((surface + "_" + hemisphere) in surfaceInfo);
+    console.log(info)
+
+    for (let attribute of ["x", "y", "z"]) {
+        if (!(attribute in info)) {
+            info[attribute] = decodeBase64(
+                info["_" + attribute], "float32");
+        }
+    }
+
+    for (let attribute of ["i", "j", "k"]) {
+        if (!(attribute in info)) {
+            info[attribute] = decodeBase64(
+                info["_" + attribute], "int32");
+        }
+    }
+
+}
+
+function makePlot(surfaceMapInfo, surface, hemisphere, surfacePlotId, viewSelectId, colorbarId, colorbarLegendId) {
+    decodeHemisphere(surfaceMapInfo, surface, hemisphere);
+    info = surfaceMapInfo[surface + "_" + hemisphere];
+    info["type"] = "mesh3d";
+    info["vertexcolor"] = surfaceMapInfo["vertexcolor_" + hemisphere];
+
+    let data = [info];
+
+    info['lighting'] = getLighting();
+    let layout = getLayout(surfacePlotId, viewSelectId,
+                           surfaceMapInfo["black_bg"]);
+    layout['title'] = {
+        text: surfaceMapInfo['title'],
+        font: {size: surfaceMapInfo["title_fontsize"],
+               color: textColor(surfaceMapInfo["black_bg"])},
+        yref: 'paper',
+        y: .95};
+    let config = getConfig();
+
+    Plotly.react(surfacePlotId, data, layout, config);
+    
+    addColorbar(surfaceMapInfo["colorscale"],
+                surfaceMapInfo["cmax"],
+                colorbarId,
+                colorbarLegendId)
+}
+
+function addPlot(surfaceMapInfo) {
+    let lhKind = $("#lh-select-kind").val();
+    makePlot(surfaceMapInfo, lhKind, "left", "lh-surface-plot", "lh-select-view", "lh-colorbar", "lh-colorbar-legend");
+    let rhKind = $("#rh-select-kind").val();
+    makePlot(surfaceMapInfo, rhKind, "right", "rh-surface-plot", "rh-select-view", "rh-colorbar", "rh-colorbar-legend");
+}
+
+function lhSurfaceRelayout(){
+    return updateLayout("lh-surface-plot", "lh-select-view", surfaceMapInfo["black_bg"]);
+}
+
+function rhSurfaceRelayout(){
+    return updateLayout("rh-surface-plot", "rh-select-view", surfaceMapInfo["black_bg"]);
+}
+
+$(document).ready(
+    function() {
+        $("#lh-select-view").change(lhSurfaceRelayout);
+        $("#rh-select-view").change(rhSurfaceRelayout);
+
+        $("#lh-surface-plot").mouseup(function() {
+            $("#lh-select-view").val("custom");
+        });
+        $("#rh-surface-plot").mouseup(function() {
+            $("#rh-select-view").val("custom");
+        });
+
+        $(window).resize(function() {
+          lhSurfaceRelayout();
+          rhSurfaceRelayout();
+        });
+    }
+);
+
+
 (function () {
   'use strict';
 
-  angular.module('GivingProfApp', [])
+  angular.module('GivingProfApp', ['ngSanitize'])
 
   .controller('GivingProfController', ['$scope', '$log', '$http', '$timeout',
     function($scope, $log, $http, $timeout) {
       $scope.submitButtonText = 'Submit';
       $scope.loading = false;
       $scope.urlerror = false;
+      $scope.success = false;
 
       $scope.getResults = function() {
         // get the URL from the input
@@ -21,6 +279,7 @@
           $scope.submitButtonText = 'Loading...';
           $scope.urlerror = false;
         }, function errorCallback(response) {
+          $scope.loading = false;
           $log.log("Error");
           $log.log(response);
         });
@@ -31,31 +290,25 @@
     
       $log.log("Polling");
       var poller = function() {
-        $http.get('/results/'+jobID).
+        $http.get('/results/' + jobID).
           success(function(data, status, headers, config) {
             if(status === 202) {
               $log.log(data, status);
             } else if (status === 200){
               $log.log(data);
 
-              const body = document.getElementById("searchResult");
-              var new_body = document.createElement("tbody");
-              new_body.id = "searchResult";
-              data.forEach( item => {
-                let row = new_body.insertRow();
-                let urlCell = row.insertCell(0);
-                var a = document.createElement('a');
-                a.href = item[0];
-                a.innerHTML = item[0];
-                urlCell.appendChild(a);
-
-                let sim_score = row.insertCell(1);
-                sim_score.innerHTML = item[1];
-              });
-              body.parentNode.replaceChild(new_body, body);
-
-              $scope.results = data;
+              addPlot(data);
               $timeout.cancel(timeout);
+              $scope.loading = false;
+              $scope.success = true;
+
+              $("#lh-select-kind").change({ surfaceMapInfo: data }, function(ev) {
+                addPlot(ev.data.surfaceMapInfo);
+              });
+              $("#rh-select-kind").change({ surfaceMapInfo: data }, function(ev) {
+                addPlot(ev.data.surfaceMapInfo);
+              });
+
               return false;
             }
             timeout = $timeout(poller, 2000);
