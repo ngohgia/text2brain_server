@@ -3,21 +3,6 @@ import numpy as np
 import pandas as pd
 
 
-def compute_corr_coeff(A, B):
-    # Rowwise mean of input arrays & subtract from input arrays
-    A_mA = A - A.mean(1)[:, None]
-    B_mB = B - B.mean(1)[:, None]
-
-    # Sum of squares across rows
-    ssA = (A_mA**2).sum(1)
-    ssB = (B_mB**2).sum(1)
-
-    # corr coeff
-    num = np.dot(A_mA, B_mB.T)
-    den = np.sqrt(np.dot(ssA[:, None], ssB[None]))
-    return np.where(den, num / den, 0)  # return 0 correlation when denominator is 0
-
-
 class PaperIndex:
     def __init__(self, image_folder):
         root = Path(image_folder)
@@ -36,6 +21,7 @@ class PaperIndex:
 
             data_rows.append({'pmid': pmid, 'title': pmid2title[pmid]})
             self.haystack[i] = self.row_of_voxels(np.load(fp))
+        self.ssB = (self.haystack**2).sum(1)
 
         self.corpus = pd.DataFrame(data_rows)
 
@@ -43,11 +29,21 @@ class PaperIndex:
 
     def row_of_voxels(self, image):
         assert image.shape == self.mask.shape, f'unexpected image shape {image.shape}'
-        return image[self.mask].astype(np.float16)
+        out = image[self.mask].astype(np.float16)
+        return out - out.mean()
+
+    def corr_coeff(self, A_mA):
+        # Sum of squares across rows
+        ssA = (A_mA**2).sum(axis=1, keepdims=True)
+
+        # corr coeff
+        num = np.dot(A_mA, self.haystack.T)
+        den = np.sqrt(np.dot(ssA, self.ssB[None]))
+        return np.where(den, num / den, 0)  # return 0 correlation when denominator is 0
 
     def query(self, image, topk=5):
         needle = self.row_of_voxels(image).reshape(1, -1)
-        corr = compute_corr_coeff(needle, self.haystack).squeeze()
+        corr = self.corr_coeff(needle).squeeze()
         indices = np.argsort(corr)[-topk:][::-1]
         # return list of dict with 2 keys 'pmid' and 'title'
         return self.corpus.iloc[indices].to_dict('records')
