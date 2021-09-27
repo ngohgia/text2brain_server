@@ -56,6 +56,27 @@ class Text2BrainModel(nn.Module):
         ret = [torch.ones(len(s)) for s in sequences]
         return pad_sequence(ret, batch_first=batch_first)
 
+def init_pretrained_model(checkpoint_file, pretrained_bert_dir, fc_channels=64, decoder_filters=32):
+    fc_channels = 64
+    decoder_filters = 32
+
+    checkpoint_file = f"checkpoints/fc{fc_channels}_d{decoder_filters}_relu_lr0.03_decay1e-06_drop0.55_seed28_checkpoint.pth"
+    pretrained_bert_dir = "scibert_scivocab_uncased"
+
+    """Init Model"""
+    model = Text2BrainModel(
+        out_channels=1,
+        fc_channels=fc_channels,
+        decoder_filters=decoder_filters,
+        pretrained_bert_dir=pretrained_bert_dir,
+        drop_p=0.55)
+
+    device = torch.device('cpu')
+    state_dict = torch.load(checkpoint_file, map_location=device)['state_dict']
+    model.load_state_dict(state_dict)
+    model.eval()
+    model.to(device)
+    return model
 
 if __name__ == "__main__":
     import numpy as np

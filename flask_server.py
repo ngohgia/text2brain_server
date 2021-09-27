@@ -17,7 +17,7 @@ from nilearn import plotting
 from nilearn import surface
 from nilearn._utils.niimg_conversions import check_niimg_3d
 from nilearn.plotting.html_surface import full_brain_info
-from models.text2brain_model import Text2BrainModel
+from models.text2brain_model import Text2BrainModel, init_pretrained_model
 
 
 application = Flask(__name__)
@@ -27,28 +27,19 @@ db = SQLAlchemy(application)
 
 q = Queue(connection=conn)
 
-MODEL = None
-OUTPUTS_DIR = "outputs"
+from results import *  # don't import just Result or a circular dependencies error will happen
 
+model = init_pretrained_model(application.config['CHECKPOINT_PATH'], application.config['SCIBERT_DIR'], fc_channels=64, decoder_filters=32)
 
-class Result(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    text = db.Column(db.String())
-    saved_path = db.Column(db.String())
-    hash_value = db.Column(db.String())
-
-    def __repr__(self):
-        return '<id {}>'.format(self.id)
-
-
-def to_img(model, text):
+def to_img(text):
     """ Output brain image """
     text = text.replace("/", "")
     hash_value = hashlib.new('sha512', text.encode()).hexdigest()
-    saved_img_path = os.path.join(OUTPUTS_DIR, f'{hash_value}.nii.gz')
+    saved_img_path = os.path.join(application.config['OUTPUTS_DIR'], f'{hash_value}.nii.gz')
 
     try:
         with torch.no_grad():
+            print(model)
             pred = model((text, )).cpu().numpy().squeeze(axis=(0, 1))
 
         vol_data = np.zeros((46, 55, 46))
@@ -84,13 +75,7 @@ def get_surface_object(stat_map_img):
     info['colorbar'] = True
     info['cbar_height'] = 0.5
     info['cbar_fontsize'] = 25
-    # info['title'] = title
-    # info['title_fontsize'] = title_fontsize
     return(info)
-
-def save_visualizer_to_html(img, hash_value):
-    view = plotting.view_img_on_surf(img, surf_mesh='fsaverage', symmetric_cmap=False, threshold='90%')
-    view.save_as_html(f'{hash_value}.lh.html')
 
 
 @application.route('/start', methods=['POST'])
@@ -100,7 +85,7 @@ def start_process():
     print('Input string:', data['url_key'])
 
     job = q.enqueue_call(func=to_img,
-                         args=(MODEL, data['url_key']),
+                         args=(data['url_key'], ),
                          result_ttl=5000)
     return job.get_id()
 
@@ -124,25 +109,5 @@ def get_results(job_key):
         return "Processing...", 202
 
 if __name__ == '__main__':
-    fc_channels = 64
-    decoder_filters = 32
-
-    checkpoint_file = f"checkpoints/fc{fc_channels}_d{decoder_filters}_relu_lr0.03_decay1e-06_drop0.55_seed28_checkpoint.pth"
-    pretrained_bert_dir = "scibert_scivocab_uncased"
-
-    """Init Model"""
-    MODEL = Text2BrainModel(
-        out_channels=1,
-        fc_channels=fc_channels,
-        decoder_filters=decoder_filters,
-        pretrained_bert_dir=pretrained_bert_dir,
-        drop_p=0.55)
-
-    device = torch.device('cpu')
-    state_dict = torch.load(checkpoint_file, map_location=device)['state_dict']
-    MODEL.load_state_dict(state_dict)
-    MODEL.eval()
-    MODEL.to(device)
-
     application.debug = True
-    application.run()
+    application.run("0.0.0.0")

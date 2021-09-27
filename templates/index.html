@@ -9,7 +9,6 @@
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-sanitize.js"></script>
     <script src="{{ url_for('static', filename='main.js') }}"></script>
-    <script src="{{ url_for('static', filename='surface.js') }}"></script>
   </head>
 
   <body ng-controller="GivingProfController">
@@ -43,67 +42,69 @@
         {% endfor %}
       </div>
 
-      <div class="spinner" id="spinner">
-        <div class="sk-chase">
-          <div class="sk-chase-dot"></div>
-          <div class="sk-chase-dot"></div>
-          <div class="sk-chase-dot"></div>
-          <div class="sk-chase-dot"></div>
-          <div class="sk-chase-dot"></div>
-          <div class="sk-chase-dot"></div>
-        </div>
-      </div>
-
-      <div class="placeholder" ng-show="!success">
-        <img class="placeholder__img" src="{{ url_for('static', filename='blank.webp') }}"></img>
-        <p class="placeholder__lead">Enter any query shorter than a tweet, or if you feel brainy, just give the button a try!</p>
-      </div>
-
-      <div style="display: flex">
-        <div style="text-align: center; margin-top: 20px; flex: 1">
-          <div id="lh-surface-plot"></div>
-          <div class="lh-colorbar-container">
-            <canvas id="lh-colorbar" class="colorbar" width="129" height="17"></canvas>
-            <div id="lh-colorbar-legend" class="colorbar-legend"></div>
-          </div>
-
-          <div class="control-container">
-            <select id="lh-select-kind">
-                <option value="inflated">Inflated</option>
-                <option value="pial" selected>Pial</option>
-            </select>
-            <select id="lh-select-view">
-                <option value="left" selected>view: Left</option>
-                <option value="right">view: Right</option>
-                <option value="front">view: Front</option>
-                <option value="back">view: Back</option>
-                <option value="top">view: Top</option>
-                <option value="bottom">view: Bottom</option>
-                <option value="custom">view: -</option>
-            </select>
+      <div class="image-container">
+        <div class="spinner" id="spinner" ng-show="loading">
+          <div class="spinner__chase">
+            <div class="spinner__chase__dot"></div>
+            <div class="spinner__chase__dot"></div>
+            <div class="spinner__chase__dot"></div>
+            <div class="spinner__chase__dot"></div>
+            <div class="spinner__chase__dot"></div>
+            <div class="spinner__chase__dot"></div>
           </div>
         </div>
-        <div style="text-align: center; margin-top: 20px; flex: 1; max-height: 200px">
-          <div id="rh-surface-plot" style="width: 100%"></div>
-          <div class="rh-colorbar-container">
-            <canvas id="rh-colorbar" class="colorbar" width="129" height="17"></canvas>
-            <div id="rh-colorbar-legend" class="colorbar-legend"></div>
-          </div>
 
-          <div class="control-container">
-            <select id="rh-select-kind">
-                <option value="inflated">Inflated</option>
-                <option value="pial" selected>Pial</option>
-            </select>
-            <select id="rh-select-view">
-                <option value="left">view: Left</option>
-                <option value="right" selected>view: Right</option>
-                <option value="front">view: Front</option>
-                <option value="back">view: Back</option>
-                <option value="top">view: Top</option>
-                <option value="bottom">view: Bottom</option>
-                <option value="custom">view: -</option>
-            </select>
+        <div class="placeholder" ng-show="!success">
+          <img class="placeholder__img" src="{{ url_for('static', filename='blank.webp') }}"></img>
+          <p class="placeholder__lead">Enter any query shorter than a tweet, or if you feel brainy, just give the button a try!</p>
+        </div>
+
+        <div style="display: flex">
+          <div style="text-align: center; margin-top: 20px; flex: 1">
+            <div id="lh-surface-plot"></div>
+            <div class="lh-colorbar-container">
+              <canvas id="lh-colorbar" class="colorbar" width="129" height="17"></canvas>
+              <div id="lh-colorbar-legend" class="colorbar-legend"></div>
+            </div>
+
+            <div class="control-container" ng-show="success">
+              <select id="lh-select-kind">
+                  <option value="inflated">Inflated</option>
+                  <option value="pial" selected>Pial</option>
+              </select>
+              <select id="lh-select-view">
+                  <option value="left" selected>view: Left</option>
+                  <option value="right">view: Right</option>
+                  <option value="front">view: Front</option>
+                  <option value="back">view: Back</option>
+                  <option value="top">view: Top</option>
+                  <option value="bottom">view: Bottom</option>
+                  <option value="custom">view: -</option>
+              </select>
+            </div>
+          </div>
+          <div style="text-align: center; margin-top: 20px; flex: 1; max-height: 200px">
+            <div id="rh-surface-plot" style="width: 100%"></div>
+            <div class="rh-colorbar-container">
+              <canvas id="rh-colorbar" class="colorbar" width="129" height="17"></canvas>
+              <div id="rh-colorbar-legend" class="colorbar-legend"></div>
+            </div>
+
+            <div class="control-container" ng-show="success">
+              <select id="rh-select-kind">
+                  <option value="inflated">Inflated</option>
+                  <option value="pial" selected>Pial</option>
+              </select>
+              <select id="rh-select-view">
+                  <option value="left">view: Left</option>
+                  <option value="right" selected>view: Right</option>
+                  <option value="front">view: Front</option>
+                  <option value="back">view: Back</option>
+                  <option value="top">view: Top</option>
+                  <option value="bottom">view: Bottom</option>
+                  <option value="custom">view: -</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
