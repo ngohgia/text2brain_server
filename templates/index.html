@@ -25,16 +25,20 @@
 
     <div class="container">
       <div class="search">
-        <span>Predict brain activation for</span>
 	<form role="form" ng-submit="getResults()">
           <div class="form-group">
-            <input type="text" ng-model="urlKey" name="url_key" class="search-input"></input>
-            <button type="submit" class="generate-button">
-              Generate
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
-                <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-              </svg>
-            </button>
+            <div class="search-input-container">
+              <span class="search-input__lead">Predict brain activation for</span>
+              <input type="text" maxlength="140" ng-model="urlKey" name="url_key" class="search-input"></input>
+            </div>
+            <div class="button-container">
+              <button type="submit" class="submit-button submit-button--generate">
+                Generate
+              </button>
+              <button class="submit-button submit-button--brainy">
+                I'm feeling brainy
+              </button>
+            </div>
           </div>
         </form>
 	{% for error in errors %}
@@ -56,7 +60,7 @@
 
         <div class="placeholder" ng-show="!success">
           <img class="placeholder__img" src="{{ url_for('static', filename='blank.webp') }}"></img>
-          <p class="placeholder__lead">Enter any query shorter than a tweet, or if you feel brainy, just give the button a try!</p>
+          <p class="placeholder__lead">Enter any query shorter than an old tweet (140 characters), or click on "I'm feeling brainy" to try it out!</p>
         </div>
 
         <div style="display: flex">
@@ -68,11 +72,14 @@
             </div>
 
             <div class="control-container" ng-show="success">
-              <select id="lh-select-kind">
+              <span class="select-control-container">
+                <select class="select-control" id="lh-select-kind">
                   <option value="inflated">Inflated</option>
                   <option value="pial" selected>Pial</option>
-              </select>
-              <select id="lh-select-view">
+                </select>
+              </span>
+              <span class="select-control-container">
+                <select class="select-control" id="lh-select-view">
                   <option value="left" selected>view: Left</option>
                   <option value="right">view: Right</option>
                   <option value="front">view: Front</option>
@@ -80,7 +87,8 @@
                   <option value="top">view: Top</option>
                   <option value="bottom">view: Bottom</option>
                   <option value="custom">view: -</option>
-              </select>
+                </select>
+              </span>
             </div>
           </div>
           <div style="text-align: center; margin-top: 20px; flex: 1; max-height: 200px">
@@ -91,11 +99,14 @@
             </div>
 
             <div class="control-container" ng-show="success">
-              <select id="rh-select-kind">
+              <span class="select-control-container">
+                <select id="rh-select-kind" class="select-control">
                   <option value="inflated">Inflated</option>
                   <option value="pial" selected>Pial</option>
-              </select>
-              <select id="rh-select-view">
+                </select>
+              </span>
+              <span class="select-control-container">
+                <select id="rh-select-view" class="select-control">
                   <option value="left">view: Left</option>
                   <option value="right" selected>view: Right</option>
                   <option value="front">view: Front</option>
@@ -103,7 +114,8 @@
                   <option value="top">view: Top</option>
                   <option value="bottom">view: Bottom</option>
                   <option value="custom">view: -</option>
-              </select>
+                </select>
+              </span>
             </div>
           </div>
         </div>

@@ -2,6 +2,7 @@ scibert_scivocab_uncased
 checkpoints
 venv
 outputs
+data
 *.db
 *.rdb
 .DS_Store
