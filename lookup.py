@@ -37,8 +37,11 @@ class PaperIndex:
         needle = self.row_of_voxels(image).reshape(1, -1)
         corr = self.corr_coeff(needle).squeeze()
         indices = np.argsort(corr)[-topk:][::-1]
-        # return list of dict with 3 keys 'pmid', 'title', and 'author'
-        return self.corpus.iloc[indices].to_dict('records')
+        out = self.corpus.iloc[indices].to_dict('records')
+        for i, entry in enumerate(out):
+            entry['correlation'] = corr[indices[i]]
+        # return list of dict with 4 keys 'pmid', 'title', 'author', and, 'correlation'
+        return out
 
 
 
