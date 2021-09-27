@@ -8,22 +8,14 @@ class PaperIndex:
         root = Path(image_folder)
         self.mask = np.load(root/'mask.npy')
 
-        frame = pd.read_csv('train.csv', usecols=['article-title', 'article-pmid'], dtype=str)
-        frame = frame.sort_values('article-pmid')
-        pmid2title = frame.set_index('article-pmid', drop=True).to_dict()['article-title']
-
-        self.haystack = np.zeros((len(frame), self.mask.sum()), dtype=np.float16)
-        data_rows = []
-        for i, pmid in enumerate(frame['article-pmid']):
+        self.corpus = pd.read_csv('train.csv', usecols=['title', 'pmid', 'author'], dtype=str).sort_values('pmid')
+        self.haystack = np.zeros((len(self.corpus), self.mask.sum()), dtype=np.float16)
+        for i, pmid in enumerate(self.corpus['pmid']):
             fp = root/f'pmid_{pmid}.npy'
             if not fp.exists():
                 raise Exception(f'Image of PMID {pmid} missing')
-
-            data_rows.append({'pmid': pmid, 'title': pmid2title[pmid]})
             self.haystack[i] = self.row_of_voxels(np.load(fp))
         self.ssB = (self.haystack**2).sum(1)
-
-        self.corpus = pd.DataFrame(data_rows)
 
         print('Initialized')
 
@@ -45,7 +37,7 @@ class PaperIndex:
         needle = self.row_of_voxels(image).reshape(1, -1)
         corr = self.corr_coeff(needle).squeeze()
         indices = np.argsort(corr)[-topk:][::-1]
-        # return list of dict with 2 keys 'pmid' and 'title'
+        # return list of dict with 3 keys 'pmid', 'title', and 'author'
         return self.corpus.iloc[indices].to_dict('records')
 
 
