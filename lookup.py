@@ -4,11 +4,11 @@ import pandas as pd
 
 
 class PaperIndex:
-    def __init__(self, image_folder):
+    def __init__(self, image_folder, train_csv):
         root = Path(image_folder)
         self.mask = np.load(root/'mask.npy')
 
-        self.corpus = pd.read_csv('train.csv', usecols=['title', 'pmid', 'author'], dtype=str).sort_values('pmid')
+        self.corpus = pd.read_csv(train_csv, usecols=['title', 'pmid', 'author'], dtype=str).sort_values('pmid')
         self.haystack = np.zeros((len(self.corpus), self.mask.sum()), dtype=np.float16)
         for i, pmid in enumerate(self.corpus['pmid']):
             fp = root/f'pmid_{pmid}.npy'
@@ -17,11 +17,11 @@ class PaperIndex:
             self.haystack[i] = self.row_of_voxels(np.load(fp))
         self.ssB = (self.haystack**2).sum(1)
 
-        print('Initialized')
+        print('Initialized librarian')
 
-    def row_of_voxels(self, image):
-        assert image.shape == self.mask.shape, f'unexpected image shape {image.shape}'
-        out = image[self.mask].astype(np.float16)
+    def row_of_voxels(self, vol):
+        assert vol.shape == self.mask.shape, f'unexpected volumetric shape {vol.shape}'
+        out = vol[self.mask].astype(np.float16)
         return out - out.mean()
 
     def corr_coeff(self, A_mA):
@@ -33,20 +33,23 @@ class PaperIndex:
         den = np.sqrt(np.dot(ssA, self.ssB[None]))
         return np.where(den, num / den, 0)  # return 0 correlation when denominator is 0
 
-    def query(self, image, topk=5):
-        needle = self.row_of_voxels(image).reshape(1, -1)
+    def query(self, vol, topk=5):
+        needle = self.row_of_voxels(vol).reshape(1, -1)
         corr = self.corr_coeff(needle).squeeze()
         indices = np.argsort(corr)[-topk:][::-1]
-        # return list of dict with 3 keys 'pmid', 'title', and 'author'
-        return self.corpus.iloc[indices].to_dict('records')
+        out = self.corpus.iloc[indices].to_dict('records')
+        for i, entry in enumerate(out):
+            entry['correlation'] = float(corr[indices[i]])
+        # return list of dict with 4 keys 'pmid', 'title', 'author', and, 'correlation'
+        return out
 
 
 
-if __name__ == '__main__':
-    librarian = PaperIndex('data/processed/images/')
-    out = librarian.query(np.load('data/processed/images/pmid_10523407.npy'))
-    print(out)
-    assert out[0]['pmid'] == '10523407'
-    out = librarian.query(np.load('data/processed/images/pmid_10666559.npy'))
-    print(out)
-    assert out[0]['pmid'] == '10666559'
+# if __name__ == '__main__':
+#     librarian = PaperIndex('data/processed/images/', 'train.csv')
+#     out = librarian.query(np.load('data/processed/images/pmid_10523407.npy'))
+#     print(out)
+#     assert out[0]['pmid'] == '10523407'
+#     out = librarian.query(np.load('data/processed/images/pmid_10666559.npy'))
+#     print(out)
+#     assert out[0]['pmid'] == '10666559'

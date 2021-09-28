@@ -171,11 +171,6 @@ function addColorbar(rawColorscale, cmax, colorbarId, legendId) {
 
 function decodeHemisphere(surfaceInfo, surface, hemisphere){
     let info = surfaceInfo[surface + "_" + hemisphere];
-    console.log(surfaceInfo)
-    console.log("info")
-    console.log(surface + "_" + hemisphere)
-    console.log((surface + "_" + hemisphere) in surfaceInfo);
-    console.log(info)
 
     for (let attribute of ["x", "y", "z"]) {
         if (!(attribute in info)) {
@@ -227,29 +222,21 @@ function addPlot(surfaceMapInfo) {
     makePlot(surfaceMapInfo, rhKind, "right", "rh-surface-plot", "rh-select-view", "rh-colorbar", "rh-colorbar-legend");
 }
 
-function lhSurfaceRelayout(){
+function lhSurfaceRelayout(surfaceMapInfo){
     return updateLayout("lh-surface-plot", "lh-select-view", surfaceMapInfo["black_bg"]);
 }
 
-function rhSurfaceRelayout(){
+function rhSurfaceRelayout(surfaceMapInfo){
     return updateLayout("rh-surface-plot", "rh-select-view", surfaceMapInfo["black_bg"]);
 }
 
 $(document).ready(
     function() {
-        $("#lh-select-view").change(lhSurfaceRelayout);
-        $("#rh-select-view").change(rhSurfaceRelayout);
-
         $("#lh-surface-plot").mouseup(function() {
             $("#lh-select-view").val("custom");
         });
         $("#rh-surface-plot").mouseup(function() {
             $("#rh-select-view").val("custom");
-        });
-
-        $(window).resize(function() {
-          lhSurfaceRelayout();
-          rhSurfaceRelayout();
         });
     }
 );
@@ -264,57 +251,145 @@ $(document).ready(
     function($scope, $log, $http, $timeout) {
       $scope.submitButtonText = 'Submit';
       $scope.loading = false;
-      $scope.urlerror = false;
+      $scope.commentLoading = false;
+      $scope.error = '';
       $scope.success = false;
+      $scope.commentSuccess = false;
+      $scope.query = '';
+      $scope.comment = '';
+      $scope.relatedArticles = [];
 
       $scope.getResults = function() {
-        // get the URL from the input
-        var userInput = $scope.urlKey;
+        var userInput = $scope.query;
 
-        // fire the API request
-        $http.post('/start', {"url_key": userInput}).then(function successCallback(response) {
-          $log.log(response);
-          pollForResults(response.data);
+        $http.post('/check', {"query": userInput}).success(function(data, status, headers, config) {
           $scope.loading = true;
-          $scope.submitButtonText = 'Loading...';
-          $scope.urlerror = false;
-        }, function errorCallback(response) {
-          $scope.loading = false;
-          $log.log("Error");
-          $log.log(response);
+
+          if (status === 200) {
+            let resultId = data["id"];
+            if (resultId > 0) {
+              $http.get('/results/' + resultId).
+                success(function(data, status, headers, config) {
+                  if (status === 200) {
+                    $scope.renderData(data, "");
+                  } else
+                    $scope.error = 'Error retrieving prediction';
+                });
+            } else {
+              $http.post('/start', {"query": userInput}).then(function successCallback(response) {
+                $scope.pollForResults(response.data);
+                $scope.loading = true;
+              }, function errorCallback(response) {
+                $scope.loading = false;
+              });
+            }
+          }
         });
       };
 
-    function pollForResults(jobID) {
-      var timeout = "";
-    
-      $log.log("Polling");
-      var poller = function() {
-        $http.get('/results/' + jobID).
-          success(function(data, status, headers, config) {
-            if(status === 202) {
-              $log.log(data, status);
-            } else if (status === 200){
-              $log.log(data);
+      $scope.createComment = function() {
+        let query = $scope.query;
+        let comment = $scope.comment;
 
-              addPlot(data);
-              $timeout.cancel(timeout);
-              $scope.loading = false;
-              $scope.success = true;
+        if (comment.length > 0)
+          $http.post('/create-comment', {
+            "query": $scope.query,
+            "comment": $scope.comment,
+          }).success(function(data, status, headers, config) {
+            $scope.commentLoading = true;
 
-              $("#lh-select-kind").change({ surfaceMapInfo: data }, function(ev) {
-                addPlot(ev.data.surfaceMapInfo);
-              });
-              $("#rh-select-kind").change({ surfaceMapInfo: data }, function(ev) {
-                addPlot(ev.data.surfaceMapInfo);
-              });
-
-              return false;
+            if (status === 200) {
+              $scope.commentLoading = false;
+              $scope.commentSuccess = true;
+            } else {
+              $scope.commentLoading = false;
+	      $scope.error = 'Error creating comment';
             }
-            timeout = $timeout(poller, 2000);
           });
       };
-      poller();
-    }
+
+      $scope.feelBrainy = function() {
+        $http.post('/feel-brainy', {}).success(function(data, status, headers, config) {
+          $scope.loading = true;
+
+          if (status === 200) {
+            let resultId = data["id"];
+            $scope.query = data["query"];
+            if (resultId > 0) {
+              $http.get('/results/' + resultId).
+                success(function(data, status, headers, config) {
+                  if (status === 200) {
+                    $scope.renderData(data, "");
+                  } else
+                    $scope.error = 'Error retrieving prediction';
+                });
+            } else {
+              $scope.error = "Error retrieving an example";
+            }
+          }
+        });
+      }
+
+      $scope.pollForResults = function(jobId) {
+        var timeout = "";
+
+        var poller = function() {
+          $http.get('/job_results/' + jobId).
+            success(function(data, status, headers, config) {
+              if (status === 202) {
+                $log.log(data, status);
+              } else if (status === 200){
+                $scope.renderData(data, timeout);
+                return false;
+              }
+              timeout = $timeout(poller, 2000);
+            });
+        };
+        poller();
+      };
+
+      $scope.renderData = function(data, timeout) {
+          let surfaceInfo = data['surface_info'];
+          let relatedArticles = data['related_articles'];
+          addPlot(surfaceInfo);
+          $scope.relatedArticles = relatedArticles;
+          if (timeout !== "")
+            $timeout.cancel(timeout);
+          $scope.loading = false;
+          $scope.success = true;
+      
+          $("#lh-select-kind").change({ surfaceMapInfo: surfaceInfo }, function(ev) {
+            addPlot(ev.data.surfaceMapInfo);
+          });
+          $("#rh-select-kind").change({ surfaceMapInfo: surfaceInfo }, function(ev) {
+            addPlot(ev.data.surfaceMapInfo);
+          });
+      
+          $("#lh-select-view").change({ surfaceMapInfo: surfaceInfo }, function(ev) {
+            lhSurfaceRelayout(ev.data.surfaceMapInfo);
+          });
+          $("#rh-select-view").change({ surfaceMapInfo: surfaceInfo }, function(ev) {
+            rhSurfaceRelayout(ev.data.surfaceMapInfo);
+          });
+      
+          $(window).resize({ surfaceMapInfo: surfaceInfo }, function(ev) {
+            lhSurfaceRelayout(ev.data.surfaceMapInfo);
+            rhSurfaceRelayout(ev.data.surfaceMapInfo);
+          });
+      };
+
+      $scope.scrollToTop = function() {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+
+      $scope.scrollToHowItWorks = function() {
+         let el = document.getElementById("how-it-works");
+         el.scrollIntoView({behavior: "smooth"});
+      }
+
+      $scope.scrollToFeedback = function() {
+         let el = document.getElementById("feedback");
+         el.scrollIntoView({behavior: "smooth"});
+      }
   }]);
 }());

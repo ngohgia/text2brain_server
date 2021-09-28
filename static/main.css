@@ -1,17 +1,24 @@
 body {
-  color: rgb(102, 102, 102);
+  color: rgb(70, 70, 70);
   font-family: 'Source Sans Pro', sans-serif;
   font-size: 18px;
   text-rendering: optimizeLegibility;
 }
 
 .navbar {
+  background-color: white;
   border-bottom: 1px solid #eee;
-  padding: 10px 15%;
+  padding: 10px 15% 15px 15%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
 }
 
 .navbar__brand {
   padding-right: 20px;
+  cursor: pointer;
 }
 
 .navbar__brand__logo {
@@ -22,6 +29,7 @@ body {
 
 .navbar__link {
   padding: 0 20px;
+  cursor: pointer;
 }
 
 .navbar__link--selected {
@@ -47,6 +55,7 @@ body {
 .container {
   padding-left: 8%;
   padding-right: 8%;
+  position: relative;
 }
   
 .image-container {
@@ -64,7 +73,8 @@ body {
 
 .search {
   font-size: 24px;
-  padding: 50px 20% 0 20%;
+  padding: 100px 20% 0 20%;
+  margin-bottom: -20px;
 }
 
 .search-input-container {
@@ -93,6 +103,10 @@ body {
 .button-container {
   padding-top: 15px;
   text-align: center;
+}
+
+.button-container--right {
+  text-align: right;
 }
 
 .submit-button {
@@ -139,7 +153,7 @@ body {
 .spinner {
   background-color: rgba(255, 255, 255, .5);
   position: absolute;
-  padding-top: 15%;
+  padding-top: 25%;
   padding-left: 47%;
   top: 0;
   bottom: 0;
@@ -251,7 +265,7 @@ body {
   transform: rotate(45deg) translateY(-50%);
   pointer-events: none;
   top: 40%;
-  right: 24px;
+  right: 20px;
   z-index: 1;
 }
 
@@ -266,8 +280,87 @@ body {
   font-size: 14px;
   color: rgb(102, 102, 102);
   border: 1px solid rgb(102, 102, 102);
-  border-radius: 3px;
-  padding: 10px 36px 10px 20px;
+  border-radius: 12px;
+  padding: 5px 30px 5px 15px;
   cursor: pointer;
 }
 
+.related-articles {
+  padding-top: 50px;
+}
+
+.related-articles__table {
+  margin: auto;
+}
+
+.related-articles__table__link {
+  text-decoration: none;
+  color: #EE244E;
+}
+
+.related-articles__table__header {
+  border-bottom: solid 1px rgb(238, 238, 238);
+  padding: 5px 10px;
+  text-align: left;
+}
+
+.related-articles__table__cell {
+  padding: 2px 10px;
+}
+
+.related-articles__table__cell--mid {
+  border-left: solid 1px rgb(238, 238, 238);
+  border-right: solid 1px rgb(238, 238, 238);
+}
+
+.related-articles__lead {
+  text-align: center;
+  padding-bottom: 30px;
+}
+
+.how-it-works {
+  background-color: rgb(244, 244, 244);
+  margin-top: 50px;
+  padding: 80px 15%;
+  text-align: center;
+  overflow: hidden;
+}
+
+.how-it-works__title {
+  font-weight: 300;
+  font-size: 32px;
+}
+
+.how-it-works__github {
+  padding: 50px 20% 25px 20%;
+  text-align: center;
+}
+
+.how-it-works__link {
+  color: rgb(102, 102, 102);
+}
+
+.how-it-works__github__link {
+  text-decoration: none;
+  padding: 0 10px;
+}
+
+.feedback {
+  padding: 80px 15% 30px 15%;
+  overflow: hidden;
+}
+
+.feedback__title {
+  font-weight: 300;
+  font-size: 32px;
+  text-align: center;
+}
+
+.feedback__input {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 18px;
+  border: solid 1px rgb(238, 238, 238);
+  padding: 15px;
+  width: 100%;
+  resize: none;
+}

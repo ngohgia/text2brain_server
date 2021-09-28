@@ -13,40 +13,16 @@
 
   <body ng-controller="GivingProfController">
     <div class="navbar">
-      <a href="/">
-        <span class="navbar__brand">
-          <img class="navbar__brand__logo" src="../static/brain_interpreter_logo.png">
-        </span>
-      </a>
-      <span class="navbar__link navbar__link--selected">Query</span>
-      <span class="navbar__link">How it works</span>
-      <span class="navbar__link navbar__link--right">Feedback</span>
+      <span class="navbar__brand" ng-click="scrollToTop()">
+        <img class="navbar__brand__logo" src="../static/brain_interpreter_logo.png">
+      </span>
+      <span class="navbar__link navbar__link--selected" ng-click="scrollToTop()">Query</span>
+      <span class="navbar__link" ng-click="scrollToHowItWorks()">How it works</span>
+      <span class="navbar__link navbar__link--right" ng-click="scrollToFeedback()">Feedbacks</span>
     </div>
 
-    <div class="container">
-      <div class="search">
-	<form role="form" ng-submit="getResults()">
-          <div class="form-group">
-            <div class="search-input-container">
-              <span class="search-input__lead">Predict brain activation for</span>
-              <input type="text" maxlength="140" ng-model="urlKey" name="url_key" class="search-input"></input>
-            </div>
-            <div class="button-container">
-              <button type="submit" class="submit-button submit-button--generate">
-                Generate
-              </button>
-              <button class="submit-button submit-button--brainy">
-                I'm feeling brainy
-              </button>
-            </div>
-          </div>
-        </form>
-	{% for error in errors %}
-            <p class="alert alert-danger">{{ error }}</h4>
-        {% endfor %}
-      </div>
-
-      <div class="image-container">
+    <div class="section">
+      <div class="container">
         <div class="spinner" id="spinner" ng-show="loading">
           <div class="spinner__chase">
             <div class="spinner__chase__dot"></div>
@@ -58,68 +34,148 @@
           </div>
         </div>
 
-        <div class="placeholder" ng-show="!success">
-          <img class="placeholder__img" src="{{ url_for('static', filename='blank.webp') }}"></img>
-          <p class="placeholder__lead">Enter any query shorter than an old tweet (140 characters), or click on "I'm feeling brainy" to try it out!</p>
+        <div class="search">
+          <div class="search-input-container">
+            <span class="search-input__lead">Predict brain activation for</span>
+            <input type="text" minLength="2" maxlength="140" ng-model="query" name="q" class="search-input" placeholder="any phrase shorter than 140 characters"></input>
+          </div>
+          <div class="button-container">
+            <button type="submit" class="submit-button submit-button--generate" ng-click="getResults()">
+              Generate
+            </button>
+            <button class="submit-button submit-button--brainy" ng-click="feelBrainy()">
+	      I'm feeling brainy
+	    </button>
+          </div>
         </div>
 
-        <div style="display: flex">
-          <div style="text-align: center; margin-top: 20px; flex: 1">
-            <div id="lh-surface-plot"></div>
-            <div class="lh-colorbar-container">
-              <canvas id="lh-colorbar" class="colorbar" width="129" height="17"></canvas>
-              <div id="lh-colorbar-legend" class="colorbar-legend"></div>
-            </div>
+        <div class="image-container">
+          <div class="placeholder" ng-show="!success">
+            <img class="placeholder__img" src="{{ url_for('static', filename='blank.webp') }}"></img>
+            <p class="placeholder__lead">Enter any query shorter than an old tweet (140 characters), or click on "I'm feeling brainy" to try it out!</p>
+          </div>
 
-            <div class="control-container" ng-show="success">
-              <span class="select-control-container">
-                <select class="select-control" id="lh-select-kind">
-                  <option value="inflated">Inflated</option>
-                  <option value="pial" selected>Pial</option>
-                </select>
-              </span>
-              <span class="select-control-container">
-                <select class="select-control" id="lh-select-view">
-                  <option value="left" selected>view: Left</option>
-                  <option value="right">view: Right</option>
-                  <option value="front">view: Front</option>
-                  <option value="back">view: Back</option>
-                  <option value="top">view: Top</option>
-                  <option value="bottom">view: Bottom</option>
-                  <option value="custom">view: -</option>
-                </select>
-              </span>
+          <div style="display: flex">
+            <div style="text-align: center; margin-top: 20px; flex: 1">
+              <div id="lh-surface-plot"></div>
+              <div class="lh-colorbar-container">
+                <canvas id="lh-colorbar" class="colorbar" width="129" height="17"></canvas>
+                <div id="lh-colorbar-legend" class="colorbar-legend"></div>
+              </div>
+
+              <div class="control-container" ng-show="success">
+                <span class="select-control-container">
+                  <select class="select-control" id="lh-select-kind">
+                    <option value="inflated">Inflated</option>
+                    <option value="pial" selected>Pial</option>
+                  </select>
+                </span>
+                <span class="select-control-container">
+                  <select class="select-control" id="lh-select-view">
+                    <option value="left" selected>view: Left</option>
+                    <option value="right">view: Right</option>
+                    <option value="front">view: Front</option>
+                    <option value="back">view: Back</option>
+                    <option value="top">view: Top</option>
+                    <option value="bottom">view: Bottom</option>
+                    <option value="custom">view: -</option>
+                  </select>
+                </span>
+              </div>
+            </div>
+            <div style="text-align: center; margin-top: 20px; flex: 1; max-height: 200px">
+              <div id="rh-surface-plot" style="width: 100%"></div>
+              <div class="rh-colorbar-container">
+                <canvas id="rh-colorbar" class="colorbar" width="129" height="17"></canvas>
+                <div id="rh-colorbar-legend" class="colorbar-legend"></div>
+              </div>
+
+              <div class="control-container" ng-show="success">
+                <span class="select-control-container">
+                  <select id="rh-select-kind" class="select-control">
+                    <option value="inflated">Inflated</option>
+                    <option value="pial" selected>Pial</option>
+                  </select>
+                </span>
+                <span class="select-control-container">
+                  <select id="rh-select-view" class="select-control">
+                    <option value="left">view: Left</option>
+                    <option value="right" selected>view: Right</option>
+                    <option value="front">view: Front</option>
+                    <option value="back">view: Back</option>
+                    <option value="top">view: Top</option>
+                    <option value="bottom">view: Bottom</option>
+                    <option value="custom">view: -</option>
+                  </select>
+                </span>
+              </div>
             </div>
           </div>
-          <div style="text-align: center; margin-top: 20px; flex: 1; max-height: 200px">
-            <div id="rh-surface-plot" style="width: 100%"></div>
-            <div class="rh-colorbar-container">
-              <canvas id="rh-colorbar" class="colorbar" width="129" height="17"></canvas>
-              <div id="rh-colorbar-legend" class="colorbar-legend"></div>
-            </div>
+        </div>
 
-            <div class="control-container" ng-show="success">
-              <span class="select-control-container">
-                <select id="rh-select-kind" class="select-control">
-                  <option value="inflated">Inflated</option>
-                  <option value="pial" selected>Pial</option>
-                </select>
-              </span>
-              <span class="select-control-container">
-                <select id="rh-select-view" class="select-control">
-                  <option value="left">view: Left</option>
-                  <option value="right" selected>view: Right</option>
-                  <option value="front">view: Front</option>
-                  <option value="back">view: Back</option>
-                  <option value="top">view: Top</option>
-                  <option value="bottom">view: Bottom</option>
-                  <option value="custom">view: -</option>
-                </select>
-              </span>
-            </div>
+        <div class="related-articles" ng-show="success">
+          <div class="related-articles__lead">
+          Articles with the average activation maps that match the predicted brain map the most, measured by Pearson's correlation
           </div>
+          <table class="related-articles__table">
+            <tr>
+              <th class="related-articles__table__header">PMID</th>
+              <th class="related-articles__table__header related-articles__table__cell--mid">Title</th>
+              <th class="related-articles__table__header">Correlation</th>
+            </tr>
+            <tbody>
+              {% raw %}
+                <tr ng-repeat="article in relatedArticles">
+                  <td class="related-articles__table__cell"><a class="related-articles__table__link" href="https://www.ncbi.nlm.nih.gov/pubmed/{{ article['pmid']}}" target="_blank">{{ article['pmid'] }}</a></td>
+                  <td class="related-articles__table__cell related-articles__table__cell--mid">{{ article['title'] }}</td>
+                  <td class="related-articles__table__cell">{{ article['correlation'].toFixed(3) }}</td>
+                </tr>
+              {% endraw %}
+            </tbody>
+          </table>
         </div>
       </div>
+    </div>
+
+    <div class="how-it-works" id="how-it-works">
+      <h1 class="how-it-works__title">How it works</h1>
+      <p class="how-it-works__text">
+        Over the years, neuroscientists have reported thousands of imaging results from functional magnetic resonance imaging (fMRI) and described their findings in scientific articles.
+        Using 13,000 published neuroimagign articles, we trained an artificial neural network to predict brain activation maps from snippets of text.
+        For more technical details, you can find more from our paper <a class="how-it-works__link" href="https://link.springer.com/chapter/10.1007/978-3-030-87234-2_57" target="_blank">Text2Brain: Synthesis of Brain Activation Maps from Free-Form Text Query</a>.
+        Huge thanks to all the neuroscienntists whose papers we have used and the authors of <a class="how-it-works__link" href="https://neurosynth.org/" target="_blank">Neurosynth</a> and <a class="how-it-works__link" href="https://neuroquery.org/" target="_blank">Neuroquery</a> for making their data public.
+      </p>
+    </div>
+    
+    <div class="feedback" id="feedback">
+      <h1 class="feedback__title">Feedbacks</h1>
+      <p class="feeback__lead">Please let us know if you spot something strange in the predicted brain maps. We would love to improve the model!</p>
+      <form role="form" ng-submit="createComment()">
+        <div class="form-group">
+          <textarea class="feedback__input" type="text" minLength="2" maxlength="512" ng-model="comment" rows="5"
+              placeholder="Any feedback you have with the predicted brain maps or the website"></textarea>
+          <div class="button-container button-container--right">
+            <span ng-show="commentSuccess">Thank you! We have received your comment</span>
+            <button type="submit" class="submit-button submit-button--brainy" style="margin-right: 0" ng-disabled="commentLoading">
+              Send
+            </button>
+          </div>
+        </div> 
+      </form>
+    </div>
+
+    <div class="how-it-works how-it-works__github">
+      Built by <a class="how-it-works__link" href="https://github.com/ngohgia" target="_blank">Gia</a> and  <a class="how-it-works__link" href="https://github.com/mnhng" target="_blank">Minh</a>. Kudos to Zoe Tan for early iterations of the website.
+      <p>
+        <a class="how-it-works__link how-it-works__github__link" href="https://github.com/sabunculab/text2brain" target="_blank">
+          {% include "icon-github.svg" %} 
+          Model
+        </a>
+        <a class="how-it-works__link how-it-works__github__link" href="https://github.com/sabunculab/text2brain_server" target="_blank">
+          {% include "icon-github.svg" %} 
+          Website
+        </a>
+      </p>
     </div>
   </body>
 </html>
