@@ -245,9 +245,9 @@ $(document).ready(
 (function () {
   'use strict';
 
-  angular.module('GivingProfApp', ['ngSanitize'])
+  angular.module('BrainInterpreterApp', ['ngSanitize'])
 
-  .controller('GivingProfController', ['$scope', '$log', '$http', '$timeout',
+  .controller('BrainInterpreterController', ['$scope', '$log', '$http', '$timeout',
     function($scope, $log, $http, $timeout) {
       $scope.submitButtonText = 'Submit';
       $scope.loading = false;
