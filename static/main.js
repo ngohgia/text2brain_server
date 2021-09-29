@@ -391,5 +391,13 @@ $(document).ready(
          let el = document.getElementById("feedback");
          el.scrollIntoView({behavior: "smooth"});
       }
+
+      $scope.toggleMenu = function() {
+         const menu = document.getElementById("navbar-menu");
+         const hamburger = document.getElementById("navbar-hamburger");
+
+         menu.classList.toggle("active");
+         hamburger.classList.toggle("active");
+      }
   }]);
 }());

@@ -1,14 +1,22 @@
 body {
   color: rgb(70, 70, 70);
   font-family: 'Source Sans Pro', sans-serif;
-  font-size: 18px;
+  font-size: 16px;
   text-rendering: optimizeLegibility;
+  line-height: 1.4;
+  line-height: 1.4;
+}
+
+.search {
+  font-size: 16px;
+  padding-top: 80px;
+  margin-bottom: -20px;
 }
 
 .navbar {
   background-color: white;
   border-bottom: 1px solid #eee;
-  padding: 10px 15% 15px 15%;
+  padding: 10px;
   position: fixed;
   top: 0;
   left: 0;
@@ -24,11 +32,62 @@ body {
 .navbar__brand__logo {
   height: 28px;
   width: auto;
-  margin-bottom: -10px;
+  margin-bottom: -15px;
+}
+
+.navbar__menu {
+  display: block;
+  position: fixed;
+  left: -100%;
+  top: 60px;
+  bottom: 0;
+  right: 0;
+  flex-direction: column;
+  background-color: #fff;
+  width: 100%;
+  border-radius: 10px;
+  text-align: center;
+  transition: 0.3s;
+  box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
+}
+
+.navbar__hamburger {
+  display: inline-block;
+  float: right;
+  margin-right: 5px;
+}
+
+.navbar__hamburger__bar {
+  border-radius: 1px;
+  display: block;
+  width: 25px;
+  height: 3px;
+  margin: 5px auto;
+  -webkit-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
+  background-color: rgb(153, 153, 153);
+}
+
+.navbar__hamburger.active .navbar__hamburger__bar:nth-child(2) {
+  opacity: 0;
+}
+
+.navbar__hamburger.active .navbar__hamburger__bar:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.navbar__hamburger.active .navbar__hamburger__bar:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+
+.navbar__menu.active {
+  left: 0;
 }
 
 .navbar__link {
-  padding: 0 20px;
+  display: block;
+  padding: 10px 0;
   cursor: pointer;
 }
 
@@ -38,12 +97,12 @@ body {
 }
 
 .navbar__link--right {
-  float: right;
+  float: none;
 }
 
 .placeholder {
   text-align: center;
-  padding-top: 20px;
+  padding-top: 40px;
 }
 
 .placeholder__img {
@@ -53,13 +112,21 @@ body {
 }
 
 .container {
-  padding-left: 8%;
-  padding-right: 8%;
+  padding-left: 10px;
+  padding-right: 10px;
+  position: relative;
+}
+
+.search-input-container {
+  text-align: center;
+}
+
+.image-container {
   position: relative;
 }
   
-.image-container {
-  position: relative;
+.plot-container {
+  display: block;
 }
 
 .container--blank {
@@ -70,16 +137,10 @@ body {
   right: 0;
   z-index: 2;
 }
-
-.search {
-  font-size: 24px;
-  padding: 100px 20% 0 20%;
-  margin-bottom: -20px;
-}
-
-.search-input-container {
-  display: flex;
-  flex-wrap: wrap;
+  
+.search-input__lead {
+  display: block;
+  margin-top: 5px;
 }
 
 .search-input {
@@ -89,9 +150,12 @@ body {
   border: none;
   border-bottom: 1px solid rgb(221, 221, 221);
   color: rgb(0, 0, 0);
-  font-size: 24px;
+  font-size: 16px;
   flex: 1;
   margin-left: 3px;
+  margin-top: 5px;
+  text-align: center;
+  width: 90%;
 }
 
 .search-input:focus,
@@ -101,7 +165,7 @@ body {
 }
 
 .button-container {
-  padding-top: 15px;
+  padding-top: 10px;
   text-align: center;
 }
 
@@ -124,10 +188,10 @@ body {
   border: 0;
   border-radius: 12px;
   text-align: center;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 400;
-  padding: 10px 30px;
-  margin: 5px 10px;
+  padding: 10px 20px;
+  margin: 5px;
   text-decoration: none;
 }
 
@@ -153,7 +217,7 @@ body {
 .spinner {
   background-color: rgba(255, 255, 255, .5);
   position: absolute;
-  padding-top: 25%;
+  padding-top: 50%;
   padding-left: 47%;
   top: 0;
   bottom: 0;
@@ -249,6 +313,12 @@ body {
   margin-top: 30px;
 }
 
+.plot-container__col {
+  text-align: center;
+  padding-top: 20px;
+  flex: 1;
+}
+
 .select-control-container {
   position: relative;
   overflow: hidden;
@@ -320,15 +390,14 @@ body {
 
 .how-it-works {
   background-color: rgb(244, 244, 244);
-  margin-top: 50px;
-  padding: 80px 15%;
+  padding: 50px 15%;
   text-align: center;
   overflow: hidden;
 }
 
 .how-it-works__title {
   font-weight: 300;
-  font-size: 32px;
+  font-size: 24px;
 }
 
 .how-it-works__github {
@@ -346,7 +415,7 @@ body {
 }
 
 .feedback {
-  padding: 80px 15% 30px 15%;
+  padding: 50px 15% 30px 15%;
   overflow: hidden;
 }
 
@@ -358,9 +427,145 @@ body {
 
 .feedback__input {
   font-family: 'Source Sans Pro', sans-serif;
-  font-size: 18px;
+  font-size: 16px;
   border: solid 1px rgb(238, 238, 238);
   padding: 15px;
   width: 100%;
   resize: none;
 }
+
+@media (min-width: 768px) {
+  body {
+    font-size: 18px;
+  }
+ 
+  .search {
+    font-size: 18px;
+    padding-left: 15%;
+    padding-right: 15%;
+  }
+
+  .navbar {
+    display: flex;
+    padding-left: 5%;
+    padding-right: 5%;
+  }
+
+  .navbar__hamburger {
+    display: none;
+  }
+
+  .navbar__menu {
+    display: block;
+    position: relative;
+    left: 0;
+    top: 0;
+    flex: 1;
+  }
+
+  .navbar__link {
+    display: inline-block;
+    float: left;
+    padding: 0 20px;
+  }
+
+  .navbar__link--right {
+    float: right;
+  }
+
+  .container {
+    font-size: 18px;
+    padding-left: 5%;
+    padding-right: 5%;
+  }
+
+  .search-input-container {
+    text-align: left;
+    display: flex;
+  }
+
+  .search-input {
+    font-size: 18px;
+    text-align: left;
+    width: 100%;
+  }
+
+  .search-input__lead {
+    display: inline-block;
+  }
+
+  .button-container {
+    padding-top: 15px;
+  }
+
+  .submit-button {
+    font-size: 18px;
+    margin: 5px 10px;
+  }
+
+  .placeholder {
+    padding-top: 50px;
+  }
+
+  .how-it-works__title {
+    font-size: 32px;
+  }
+
+  .how-it-works {
+    padding-bottom: 80px;
+    padding-top: 80px;
+  }
+
+  .feedback {
+    padding-top: 50px;
+  } 
+
+  .feedback__input {
+    font-size: 18px;
+  }
+
+  .plot-container {
+    display: flex;
+  }
+
+  .related-articles__lead {
+    margin-top: 0;
+  }
+
+  .spinner {
+    padding-top: 25%;
+  }
+}
+  
+@media (min-width: 992px) {
+  .navbar {
+    padding-left: 15%;
+    padding-right: 15%;
+  }
+
+  .search {
+    font-size: 24px;
+    padding-top: 100px;
+    padding-left: 20%;
+    padding-right: 20%;
+  }
+
+  .container {
+    font-size: 24px;
+    padding-left: 8%;
+    padding-right: 8%;
+  }
+
+  .search-input {
+    font-size: 24px;
+  }
+
+  .submit-button {
+    padding: 10px 30px;
+  }
+
+  .how-it-works__title {
+    font-size: 32px;
+  }
+}
+

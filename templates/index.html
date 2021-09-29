@@ -29,9 +29,16 @@
       <span class="navbar__brand" ng-click="scrollToTop()">
         <img class="navbar__brand__logo" src="../static/brain_interpreter_logo.png">
       </span>
-      <span class="navbar__link navbar__link--selected" ng-click="scrollToTop()">Query</span>
-      <span class="navbar__link" ng-click="scrollToHowItWorks()">How it works</span>
-      <span class="navbar__link navbar__link--right" ng-click="scrollToFeedback()">Feedbacks</span>
+      <div class="navbar__menu" id="navbar-menu">
+        <span class="navbar__link navbar__link--selected" ng-click="scrollToTop()">Query</span>
+        <span class="navbar__link" ng-click="scrollToHowItWorks()">How it works</span>
+        <span class="navbar__link navbar__link--right" ng-click="scrollToFeedback()">Feedbacks</span>
+      </div>
+      <div class="navbar__hamburger" id="navbar-hamburger" ng-click="toggleMenu()">
+        <span class="navbar__hamburger__bar"></span>
+        <span class="navbar__hamburger__bar"></span>
+        <span class="navbar__hamburger__bar"></span>
+      </div>
     </div>
 
     <div class="section">
@@ -68,10 +75,10 @@
             <p class="placeholder__lead">Enter any query shorter than an old tweet (140 characters), or click on "I'm feeling brainy" to try it out!</p>
           </div>
 
-          <div style="display: flex">
-            <div style="text-align: center; margin-top: 20px; flex: 1">
+          <div class="plot-container">
+            <div class="plot-container__col">
               <div id="lh-surface-plot"></div>
-              <div class="lh-colorbar-container">
+              <div class="lh-colorbar-container" ng-show="success">
                 <canvas id="lh-colorbar" class="colorbar" width="129" height="17"></canvas>
                 <div id="lh-colorbar-legend" class="colorbar-legend"></div>
               </div>
@@ -96,9 +103,9 @@
                 </span>
               </div>
             </div>
-            <div style="text-align: center; margin-top: 20px; flex: 1; max-height: 200px">
+            <div class="plot-container__col">
               <div id="rh-surface-plot" style="width: 100%"></div>
-              <div class="rh-colorbar-container">
+              <div class="rh-colorbar-container" ng-show="success">
                 <canvas id="rh-colorbar" class="colorbar" width="129" height="17"></canvas>
                 <div id="rh-colorbar-legend" class="colorbar-legend"></div>
               </div>
