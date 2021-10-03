@@ -1,13 +1,17 @@
-# Text2Brain Webpage
+# Text2Brain Web Server
 ![brain interpreter preview](./figures/brain_interpreter.gif)
 
 A webpage that deploys [Text2Brain](https://github.com/ngohgia/text2brain) model for predicting brain activation maps from free-form text query.
 The webpage is built with Flask + SQLite + AngularJS + Redis + RQ.
 
+----
+
 ## Broad picture
 The setup is largely similar to this RealPython [tutorial](https://realpython.com/flask-by-example-part-2-postgres-sqlalchemy-and-alembic/) (we highly recommend going through this tutorial).
 Essentially there are two main python files, `app.py` is the Flask web server and `worker.py` performs the inference.
 `app.py` receives input query, which is then passed to a job that is queued by Redis and run in the background by `worker.py` without interfering with new web requests.
+
+----
 
 ## How to run
 
@@ -24,3 +28,9 @@ How to run locally in debug mode:
 - Initialize the database `from app import db; db.create_all()`
 - Run the worker `python worker.py`
 - Run the web server on another terminal window/tab `python app.py`
+
+----
+
+## Bugs and Questions
+
+Please contact Gia at ngohoanggia@gmail.com
