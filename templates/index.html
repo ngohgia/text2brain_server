@@ -59,7 +59,7 @@
         <div class="search">
           <div class="search-input-container">
             <span class="search-input__lead">Predict brain activation for</span>
-            <input type="text" minLength="2" maxlength="140" ng-model="query" name="q" class="search-input" placeholder="any phrase shorter than 140 characters"></input>
+            <input type="text" autocomplete="off" minLength="2" maxlength="140" ng-model="query" name="q" class="search-input" placeholder="any phrase shorter than 140 characters"></input>
           </div>
           <div class="button-container">
             <button type="submit" class="submit-button submit-button--generate" ng-click="getResults()">
