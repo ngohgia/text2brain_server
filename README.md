@@ -20,7 +20,7 @@ Requirements:
 - Create a virtual environment with [venv](https://docs.python.org/3/tutorial/venv.htm) and install packages under `requirements.txt`
 - Install [sqlite](https://www.sqlite.org/index.html)
 - Install [redis](https://redis.io/)
-- Download checkpoints from [Google Drive](https://drive.google.com/file/d/13Gc0M4i4zj16aVtZzGUQs4oPcoyRTGWw/view?usp=sharing) and do `tar -xzvf checkpoints.tar.gz`
+- Download checkpoints from [Google Drive](https://drive.google.com/file/d/1IwUGtdbmseTrFU9NAA9gC-k-Iy5hesQs/view?usp=sharing) and do `tar -xzvf text2brain_checkpoint.tar.gz`
 - Download uncased SciBert pretrained model from [AllenAI S3](https://s3-us-west-2.amazonaws.com/ai2-s2-research/scibert/huggingface_pytorch/scibert_scivocab_uncased.tar) and unzip into `scibert_scivocab_uncased` directory
 
 How to run locally in debug mode:
