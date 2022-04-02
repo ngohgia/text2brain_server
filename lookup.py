@@ -4,24 +4,16 @@ import pandas as pd
 
 
 class PaperIndex:
-    def __init__(self, image_folder, train_csv):
-        root = Path(image_folder)
-        self.mask = np.load(root/'mask.npy')
-
+    def __init__(self, haystack_file, train_csv):
         self.corpus = pd.read_csv(train_csv, usecols=['title', 'pmid', 'author'], dtype=str).sort_values('pmid')
-        self.haystack = np.zeros((len(self.corpus), self.mask.sum()), dtype=np.float16)
-        for i, pmid in enumerate(self.corpus['pmid']):
-            fp = root/f'pmid_{pmid}.npy'
-            if not fp.exists():
-                raise Exception(f'Image of PMID {pmid} missing')
-            self.haystack[i] = self.row_of_voxels(np.load(fp))
+        self.haystack = np.load(haystack_file)
         self.ssB = (self.haystack**2).sum(1)
 
         print('Initialized librarian')
 
-    def row_of_voxels(self, vol):
-        assert vol.shape == self.mask.shape, f'unexpected volumetric shape {vol.shape}'
-        out = vol[self.mask].astype(np.float16)
+    def demean(self, masked_vol):
+        assert len(masked_vol) == self.haystack.shape[-1]
+        out = masked_vol.astype(np.float16)
         return out - out.mean()
 
     def corr_coeff(self, A_mA):
@@ -33,8 +25,8 @@ class PaperIndex:
         den = np.sqrt(np.dot(ssA, self.ssB[None]))
         return np.where(den, num / den, 0)  # return 0 correlation when denominator is 0
 
-    def query(self, vol, topk=5):
-        needle = self.row_of_voxels(vol).reshape(1, -1)
+    def query(self, masked_vol, topk=5):
+        needle = np.expand_dims(self.demean(masked_vol), axis=0)
         corr = self.corr_coeff(needle).squeeze()
         indices = np.argsort(corr)[-topk:][::-1]
         out = self.corpus.iloc[indices].to_dict('records')
@@ -45,11 +37,16 @@ class PaperIndex:
 
 
 
-# if __name__ == '__main__':
-#     librarian = PaperIndex('data/processed/images/', 'train.csv')
-#     out = librarian.query(np.load('data/processed/images/pmid_10523407.npy'))
-#     print(out)
-#     assert out[0]['pmid'] == '10523407'
-#     out = librarian.query(np.load('data/processed/images/pmid_10666559.npy'))
-#     print(out)
-#     assert out[0]['pmid'] == '10666559'
+if __name__ == '__main__':
+    librarian = PaperIndex('data/train_img_by_pmid.npy', '/Users/ngohgia/Work/text2brain_server/data/processed/train.csv')
+    mask = np.load("data/processed/images/mask.npy")
+    raw_sample = np.load('data/processed/images/pmid_10523407.npy')
+    masked_vol = raw_sample[mask > 0]
+    out = librarian.query(masked_vol)
+    print(out)
+    assert out[0]['pmid'] == '10523407'
+    raw_sample = np.load('data/processed/images/pmid_10666559.npy')
+    masked_vol = raw_sample[mask > 0]
+    out = librarian.query(masked_vol)
+    print(out)
+    assert out[0]['pmid'] == '10666559'

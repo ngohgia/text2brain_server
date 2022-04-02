@@ -262,30 +262,15 @@ $(document).ready(
       $scope.getResults = function() {
         var userInput = $scope.query;
 
-        $http.post('/check', {"query": userInput}).success(function(data, status, headers, config) {
-          $scope.loading = true;
-
+        $scope.loading = true;
+        $http.post('/predict', {"query": userInput}).success(function(data, status, headers, config) {
           if (status === 200) {
-            let resultId = data["id"];
-            if (resultId > 0) {
-              $http.get('/results/' + resultId).
-                success(function(data, status, headers, config) {
-                  if (status === 200) {
-                    $scope.renderData(data, "");
-                  } else
-                    $scope.error = 'Error retrieving prediction';
-                });
-            } else {
-              $http.post('/start', {"query": userInput}).then(function successCallback(response) {
-                $scope.pollForResults(response.data);
-                $scope.loading = true;
-              }, function errorCallback(response) {
-                $scope.loading = false;
-              });
-            }
+            $scope.renderData(data, "");
+          } else {
+            $scope.error = 'Error retrieving prediction';
           }
         });
-      };
+      }
 
       $scope.createComment = function() {
         let query = $scope.query;
@@ -309,44 +294,16 @@ $(document).ready(
       };
 
       $scope.feelBrainy = function() {
+        $scope.loading = true;
         $http.post('/feel-brainy', {}).success(function(data, status, headers, config) {
-          $scope.loading = true;
-
           if (status === 200) {
-            let resultId = data["id"];
-            $scope.query = data["query"];
-            if (resultId > 0) {
-              $http.get('/results/' + resultId).
-                success(function(data, status, headers, config) {
-                  if (status === 200) {
-                    $scope.renderData(data, "");
-                  } else
-                    $scope.error = 'Error retrieving prediction';
-                });
-            } else {
-              $scope.error = "Error retrieving an example";
-            }
+            $scope.renderData(data, "");
+          } else {
+            $scope.error = 'Error retrieving prediction';
           }
+
         });
       }
-
-      $scope.pollForResults = function(jobId) {
-        var timeout = "";
-
-        var poller = function() {
-          $http.get('/job_results/' + jobId).
-            success(function(data, status, headers, config) {
-              if (status === 202) {
-                $log.log(data, status);
-              } else if (status === 200){
-                $scope.renderData(data, timeout);
-                return false;
-              }
-              timeout = $timeout(poller, 2000);
-            });
-        };
-        poller();
-      };
 
       $scope.renderData = function(data, timeout) {
           let surfaceInfo = data['surface_info'];
@@ -355,6 +312,7 @@ $(document).ready(
           $scope.relatedArticles = relatedArticles;
           if (timeout !== "")
             $timeout.cancel(timeout);
+          $scope.query = data["query"];
           $scope.loading = false;
           $scope.success = true;
       
