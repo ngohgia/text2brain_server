@@ -10,7 +10,6 @@ from config import Config
 
 import numpy as np
 import time
-import torch
 import nibabel as nib
 from nilearn import plotting
 from nilearn import surface
