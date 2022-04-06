@@ -9,6 +9,7 @@ from sqlalchemy.dialects.postgresql import JSON
 from config import Config
 
 import numpy as np
+import logging
 import time
 import nibabel as nib
 from nilearn import plotting
@@ -104,7 +105,6 @@ def _predict_or_retrieve(query):
 
       info = get_surface_object(pred_img)
 
-      application.logger.info(pred.shape)
       related_articles = librarian.query(pred)
 
       return jsonify({"query": query, "surface_info": info, "related_articles": related_articles})
@@ -115,3 +115,7 @@ def _predict_or_retrieve(query):
 if __name__ == '__main__':
     application.debug = True
     application.run("0.0.0.0")
+else:
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    application.logger.handlers = gunicorn_logger.handlers
+    application.logger.setLevel(gunicorn_logger.level)
