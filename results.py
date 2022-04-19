@@ -4,6 +4,7 @@ class Result(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String())
     img_name = db.Column(db.String())
+    related_articles = db.Column(db.String())
     count = db.Column(db.Integer)
 
     db.Index('idx_text', 'text')

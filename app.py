@@ -16,8 +16,6 @@ from nilearn import plotting
 from nilearn import surface
 from nilearn._utils.niimg_conversions import check_niimg_3d
 from nilearn.plotting.html_surface import full_brain_info
-from lookup import PaperIndex
-
 
 application = Flask(__name__)
 application.config.from_object(Config)
@@ -27,8 +25,9 @@ db = SQLAlchemy(application)
 from results import *  # don't import just Result or a circular dependencies error will happen
 from comments import *
 
-librarian = PaperIndex(application.config['TRAIN_IMG_BY_PMID_FILE'], application.config['TRAIN_CSV'])
 mask  = np.load(application.config['MASK_FILE'])
+
+LOCAL_OUTPUTS_DIR = application.config["OUTPUTS_DIR"]
 
 def get_surface_object(stat_map_img):
     stat_map_img = check_niimg_3d(stat_map_img)
@@ -71,41 +70,50 @@ def predict():
     query = data["query"].lower().strip().replace("/", "")[:application.config['MAX_QUERY_LENGTH']]
     return _predict_or_retrieve(query)
 
+def _save_brain_img(img_name, pred, mask):
+    vol_data = np.zeros((46, 55, 46))
+    affine = np.array([[   4.,    0.,    0.,  -90.],
+       [   0.,    4.,    0., -126.],
+       [   0.,    0.,    4.,  -72.],
+       [   0.,    0.,    0.,    1.]])
+
+    cropped_vol = np.zeros((40, 48, 40))
+    cropped_vol[mask] = pred
+    vol_data[3:-3, 3:-4, :-6] = cropped_vol
+    pred_img = nib.Nifti1Image(vol_data, affine)
+
+    local_img_path = os.path.join(LOCAL_OUTPUTS_DIR, "%s.nii.gz" % img_name)
+    nib.save(pred_img, local_img_path)
+
+    return pred_img
+
 def _predict_or_retrieve(query):
     try:
       existing_results = Result.query.filter_by(text=query)
       if existing_results.count() > 0:
+        print("AAAA")
         result = existing_results.first()
+
         result.count = result.count + 1
         db.session.commit()
 
-        r = requests.post(application.config["GCF_URL"], json={ "query": query, "img_name": result.img_name })
-        if "result" not in r.json():
-          r = requests.post(application.config["GCF_URL"], json={ "query": query})
+        img_name = result.img_name
+        related_articles = json.loads(result.related_articles)
+        local_img_path = os.path.join(LOCAL_OUTPUTS_DIR, "%s.nii.gz" % img_name)
+        pred_img = nib.load(local_img_path)
       else:
-        r = requests.post(application.config["GCF_URL"], json={ "query": query})
-        img_name = r.json()["img_name"]
+        r = requests.post(application.config["GCF_URL"], json={ "query": query}).json()
+        img_name = r["img_name"]
+        related_articles = r["related_articles"]
 
-        result = Result(text=query, img_name=img_name, count=1)
+        result = Result(text=query, img_name=img_name, related_articles=json.dumps(related_articles), count=1)
         db.session.add(result)
         db.session.commit()
 
-      pred = np.asarray(r.json()["result"])
-
-      vol_data = np.zeros((46, 55, 46))
-      affine = np.array([[   4.,    0.,    0.,  -90.],
-         [   0.,    4.,    0., -126.],
-         [   0.,    0.,    4.,  -72.],
-         [   0.,    0.,    0.,    1.]])
-
-      cropped_vol = np.zeros((40, 48, 40))
-      cropped_vol[mask] = pred
-      vol_data[3:-3, 3:-4, :-6] = cropped_vol
-      pred_img = nib.Nifti1Image(vol_data, affine)
+        pred = np.asarray(r["result"])
+        pred_img = _save_brain_img(img_name, pred, mask)
 
       info = get_surface_object(pred_img)
-
-      related_articles = librarian.query(pred)
 
       return jsonify({"query": query, "surface_info": info, "related_articles": related_articles})
     except Exception as err:

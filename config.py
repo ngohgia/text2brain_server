@@ -12,6 +12,7 @@ class Config(object):
     TRAIN_IMG_BY_PMID_FILE = os.getenv('TEXT2BRAIN_TRAIN_IMAGE_BY_PMID_FILE')
     TRAIN_CSV = os.getenv('TEXT2BRAIN_TRAIN_CSV')
     MASK_FILE = os.getenv('TEXT2BRAIN_MASK_IMG')
+    OUTPUTS_DIR = os.getenv('TEXT2BRAIN_OUTPUTS_DIR')
     
     GCF_URL = os.getenv('TEXT2BRAIN_GCF_URL')
 
