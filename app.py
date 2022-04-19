@@ -32,7 +32,7 @@ LOCAL_OUTPUTS_DIR = application.config["OUTPUTS_DIR"]
 def get_surface_object(stat_map_img):
     stat_map_img = check_niimg_3d(stat_map_img)
     info = full_brain_info(
-        volume_img=stat_map_img, mesh='fsaverage', threshold="80%",
+        volume_img=stat_map_img, mesh='fsaverage5', threshold="80%",
         cmap=plotting.cm.cold_hot, black_bg=False, vmax=None, vmin=None,
         symmetric_cmap=True, vol_to_surf_kwargs={})
     info['colorbar'] = True
@@ -91,7 +91,6 @@ def _predict_or_retrieve(query):
     try:
       existing_results = Result.query.filter_by(text=query)
       if existing_results.count() > 0:
-        print("AAAA")
         result = existing_results.first()
 
         result.count = result.count + 1
