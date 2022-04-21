@@ -34,7 +34,7 @@
       <div class="navbar__menu" id="navbar-menu">
         <span class="navbar__link navbar__link--selected" ng-click="scrollToTop()">Query</span>
         <span class="navbar__link" ng-click="scrollToHowItWorks()">How it works</span>
-        <span class="navbar__link navbar__link--right" ng-click="scrollToFeedback()">Feedbacks</span>
+        <span class="navbar__link navbar__link--right" ng-click="scrollToFeedback()">Feedback</span>
       </div>
       <div class="navbar__hamburger" id="navbar-hamburger" ng-click="toggleMenu()">
         <span class="navbar__hamburger__bar"></span>
@@ -137,13 +137,13 @@
 
         <div class="related-articles" ng-show="success">
           <div class="related-articles__lead">
-          Articles with the average activation maps that match the predicted brain map the most, measured by Pearson's correlation
+          Articles with the average activation maps that best match the predicted brain map
           </div>
           <table class="related-articles__table">
             <tr>
               <th class="related-articles__table__header">PMID</th>
               <th class="related-articles__table__header related-articles__table__cell--mid">Title</th>
-              <th class="related-articles__table__header">Correlation</th>
+              <th class="related-articles__table__header">Pearson's correlation</th>
             </tr>
             <tbody>
               {% raw %}
@@ -161,16 +161,27 @@
 
     <div class="how-it-works" id="how-it-works">
       <h1 class="how-it-works__title">How it works</h1>
+      <p class="how-it-works__reference">
+         Gia H. Ngo, Minh Nguyen, Nancy F. Chen, Mert R. Sabuncu. <a class="how-it-works__link" href="https://link.springer.com/chapter/10.1007/978-3-030-87234-2_57" target="_blank">Text2Brain: Synthesis of Brain Activation Maps from Free-Form Text Query</a>. In International Conference on Medical Image Computing and Computer-Assisted Intervention, 2021
+      </p>
       <p class="how-it-works__text">
         Over the years, neuroscientists have reported thousands of imaging results from functional magnetic resonance imaging (fMRI) and described their findings in scientific articles.
-        Using 13,000 published neuroimagign articles, we trained an artificial neural network to predict brain activation maps from snippets of text.
-        For more technical details, you can find more from our paper <a class="how-it-works__link" href="https://link.springer.com/chapter/10.1007/978-3-030-87234-2_57" target="_blank">Text2Brain: Synthesis of Brain Activation Maps from Free-Form Text Query</a>.
-        Huge thanks to all the neuroscienntists whose papers we have used and the authors of <a class="how-it-works__link" href="https://neurosynth.org/" target="_blank">Neurosynth</a> and <a class="how-it-works__link" href="https://neuroquery.org/" target="_blank">Neuroquery</a> for making their data public.
+        Using 13,000 published neuroimaging articles, we trained an artificial neural network to predict brain activation maps from snippets of text.
+        The figure below shows the schematic of the model and the training procedure.
       </p>
+      <p class="how-it-works__text">
+        <img class="how-it-works__model" src="{{ url_for('static', filename='t2b_model.png') }}">
+      </p>
+      <p class="how-it-works__list">
+        <span class="how-it-works__list__bullet">1</span>Text2Brain consists of a text encoder based on <a href="https://arxiv.org/abs/1903.10676" target="_blank">SciBert</a> language model, and a 3-D convolutional neural network (CNN).</br>
+        <span class="how-it-works__list__bullet">2</span>For each training sample, a text snippet is randomly picked from the title, keywords, sentences from abstract or discussion of a published research article. For each article, a 3-D volumetric brain image created by placing a 9-mm full-width-half-max (FWHM) Gaussian sphere at an activation coordinate reported in the article. This procedure results in several text-image sample pairs per research article.</li></br>
+        <span class="how-it-works__list__bullet">3</span>Given a text query input, the text encoder produces an encoding vector, which is then reshaped and passed through the 3-D CNN to generate a brain image. During training, the model is optimized using back propagation from mean squared error (MSE) between the predicted and target brain images.
+      </p>
+      Huge thanks to all the neuroscienntists whose papers we have used and the authors of <a class="how-it-works__link" href="https://neurosynth.org/" target="_blank">Neurosynth</a> and <a class="how-it-works__link" href="https://neuroquery.org/" target="_blank">Neuroquery</a> for making their data public.
     </div>
     
     <div class="feedback" id="feedback">
-      <h1 class="feedback__title">Feedbacks</h1>
+      <h1 class="feedback__title">Feedback</h1>
       <p class="feeback__lead">Please let us know if you spot something strange in the predicted brain maps. We would love to improve the model!</p>
       <form role="form" ng-submit="createComment()">
         <div class="form-group">

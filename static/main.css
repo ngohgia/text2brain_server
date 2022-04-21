@@ -48,7 +48,6 @@ body {
   border-radius: 10px;
   text-align: center;
   transition: 0.3s;
-  box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
 }
 
 .navbar__hamburger {
@@ -86,6 +85,7 @@ body {
 }
 
 .navbar__link {
+  background-color: white;
   display: block;
   padding: 10px 0;
   cursor: pointer;
@@ -112,6 +112,7 @@ body {
 }
 
 .container {
+  padding-bottom: 50px;
   padding-left: 10px;
   padding-right: 10px;
   position: relative;
@@ -391,13 +392,36 @@ body {
 .how-it-works {
   background-color: rgb(244, 244, 244);
   padding: 50px 15%;
-  text-align: center;
+  text-align: left;
   overflow: hidden;
+}
+
+.how-it-works__reference {
+  background-color: rgb(248, 248, 248);
+  border: solid 1px rgb(221, 221, 221);
+  border-radius: 5px;
+  margin-bottom: 20px;
+  padding: 20px;
+
+  > strong {
+    font-weight: 700 !important;
+  }
+}
+
+.how-it-works__model {
+  height: auto;
+  width: 100%;
 }
 
 .how-it-works__title {
   font-weight: 300;
   font-size: 24px;
+  text-align: center;
+}
+
+.how-it-works__subtitle {
+  font-weight: 300;
+  font-size: 18px;
 }
 
 .how-it-works__github {
@@ -412,6 +436,22 @@ body {
 .how-it-works__github__link {
   text-decoration: none;
   padding: 0 10px;
+}
+
+.how-it-works__list {
+  padding: 20px 20px;
+}
+
+.how-it-works__list__bullet {
+  color: white;
+  background-color: rgb(153, 153, 153);
+  border-radius: 50%;
+  padding-left: 7px;
+  box-sizing: border-box;
+  width: 25px;
+  height: 25px;
+  display: inline-block;
+  margin-right: 10px;
 }
 
 .feedback {
