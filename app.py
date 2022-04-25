@@ -56,7 +56,7 @@ def index():
     if query is None:
       query = _get_random_example_query()
       return redirect(url_for('index', q=query))
-    return render_template('index.html')
+    return render_template('index.html', google_analytics_id=application.config["GOOGLE_ANALYTICS_ID"])
 
 @application.route('/create-comment', methods=['POST'])
 def create_comment():

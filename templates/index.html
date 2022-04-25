@@ -16,13 +16,13 @@
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-sanitize.js"></script>
     <script src="{{ url_for('static', filename='main.js') }}"></script>
 
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PNJKKG73CB"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{google_analytics_id}}"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
     
-      gtag('config', 'G-PNJKKG73CB');
+      gtag('config', {{google_analytics_id}});
     </script>
   </head>
 

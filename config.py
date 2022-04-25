@@ -13,6 +13,7 @@ class Config(object):
     TRAIN_CSV = os.getenv('TEXT2BRAIN_TRAIN_CSV')
     MASK_FILE = os.getenv('TEXT2BRAIN_MASK_IMG')
     OUTPUTS_DIR = os.getenv('TEXT2BRAIN_OUTPUTS_DIR')
+    GOOGLE_ANALYTICS_ID = os.getenv('TEXT2BRAIN_GOOGLE_ANALYTICS_ID')
     
     GCF_URL = os.getenv('TEXT2BRAIN_GCF_URL')
 
