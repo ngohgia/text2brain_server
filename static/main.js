@@ -245,27 +245,46 @@ $(document).ready(
 (function () {
   'use strict';
 
-  angular.module('BrainInterpreterApp', ['ngSanitize'])
+  var app = angular.module('BrainInterpreterApp', ['ngSanitize']);
 
-  .controller('BrainInterpreterController', ['$scope', '$log', '$http', '$timeout',
-    function($scope, $log, $http, $timeout) {
+  app.config(function($locationProvider) {
+    $locationProvider.html5Mode({
+      enabled: true,
+      requireBase: false
+    });
+  });
+
+  app.controller('BrainInterpreterController', ['$scope', '$log', '$http', '$location', '$document',
+    function($scope, $log, $http, $location, $document) {
       $scope.submitButtonText = 'Submit';
       $scope.loading = false;
       $scope.commentLoading = false;
       $scope.error = '';
       $scope.success = false;
       $scope.commentSuccess = false;
-      $scope.query = '';
+      $scope.downloadPath = '';
+      $scope.sharePath = '';
       $scope.comment = '';
       $scope.relatedArticles = [];
+      
+      $scope.query = $location.search().q;
+
+      $document.ready(function() {
+        $http.post('/init');
+
+        if ($scope.query.length > 0)
+          $scope.getResults();
+      });
 
       $scope.getResults = function() {
         var userInput = $scope.query;
+        $location.search('q', userInput);
 
         $scope.loading = true;
+        $scope.downloadPath = '';
         $http.post('/predict', {"query": userInput}).success(function(data, status, headers, config) {
           if (status === 200) {
-            $scope.renderData(data, "");
+            $scope.renderData(data);
           } else {
             $scope.error = 'Error retrieving prediction';
           }
@@ -295,9 +314,10 @@ $(document).ready(
 
       $scope.feelBrainy = function() {
         $scope.loading = true;
+        $scope.downloadPath = '';
         $http.post('/feel-brainy', {}).success(function(data, status, headers, config) {
           if (status === 200) {
-            $scope.renderData(data, "");
+            $scope.renderData(data);
           } else {
             $scope.error = 'Error retrieving prediction';
           }
@@ -305,16 +325,19 @@ $(document).ready(
         });
       }
 
-      $scope.renderData = function(data, timeout) {
+      $scope.renderData = function(data) {
           let surfaceInfo = data['surface_info'];
           let relatedArticles = data['related_articles'];
           addPlot(surfaceInfo);
           $scope.relatedArticles = relatedArticles;
-          if (timeout !== "")
-            $timeout.cancel(timeout);
           $scope.query = data["query"];
+          $scope.downloadPath = data["download_path"];
+          
           $scope.loading = false;
           $scope.success = true;
+
+          let shareText = `Check out #braininterpreter synthesized brain image for "${$scope.query}": ${$location.absUrl()}`;
+          $scope.sharePath = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
       
           $("#lh-select-kind").change({ surfaceMapInfo: surfaceInfo }, function(ev) {
             addPlot(ev.data.surfaceMapInfo);
@@ -356,6 +379,10 @@ $(document).ready(
 
          menu.classList.toggle("active");
          hamburger.classList.toggle("active");
+      }
+
+      $scope.share = function() {
+        let href="https://twitter.com/intent/tweet?text=Hello%20world"
       }
   }]);
 }());

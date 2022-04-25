@@ -9,7 +9,7 @@ body {
 
 .search {
   font-size: 16px;
-  padding-top: 80px;
+  padding-top: 60px;
   margin-bottom: -20px;
 }
 
@@ -201,10 +201,21 @@ body {
   color: white;
 }
 
-.submit-button--brainy {
+.submit-button--white {
   background-color: white;
   border: solid 1px rgb(102, 102, 102);
   color: rgb(102, 102, 102);
+}
+
+.submit-button--twitter {
+  background-color: rgb(29, 161, 242);
+  color: white;
+}
+
+.submit-button--twitter > img {
+  margin-bottom: -2px;
+  margin-right: 5px;
+  height: 18px;
 }
 
 .generate-button:hover {
@@ -354,6 +365,11 @@ body {
   border-radius: 12px;
   padding: 5px 30px 5px 15px;
   cursor: pointer;
+}
+
+.download-button-container {
+  margin-top: 30px;
+  text-align: center;
 }
 
 .related-articles {

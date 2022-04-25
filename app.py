@@ -3,7 +3,7 @@ import json
 import hashlib
 import requests
 import random
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, redirect, jsonify, url_for, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import JSON
 from config import Config
@@ -40,16 +40,22 @@ def get_surface_object(stat_map_img):
     info['cbar_fontsize'] = 25
     return(info)
 
+def _get_random_example_query():
+    rand_id = np.random.randint(len(application.config["EXAMPLES"]))
+    return application.config["EXAMPLES"][rand_id]
+
 
 @application.route('/feel-brainy', methods=['POST'])
 def feel_brainy():
-    rand_id = np.random.randint(len(application.config["EXAMPLES"]))
-
-    query = application.config["EXAMPLES"][rand_id]
+    query = _get_random_example_query()
     return _predict_or_retrieve(query)
 
 @application.route('/', methods=['GET'])
 def index():
+    query = request.args.get('q', None)
+    if query is None:
+      query = _get_random_example_query()
+      return redirect(url_for('index', q=query))
     return render_template('index.html')
 
 @application.route('/create-comment', methods=['POST'])
@@ -61,7 +67,11 @@ def create_comment():
       db.session.commit()
       return {"success": "true"}
     except Exception as err:
-        return {"error": "Unable to add comment to database: %s" % str(err)}
+      return {"error": "Unable to add comment to database: %s" % str(err)}
+
+@application.route('/download/<string:filename>')
+def download(filename):
+    return send_from_directory(LOCAL_OUTPUTS_DIR, "%s.nii.gz" % filename, as_attachment=True)
 
 @application.route('/predict', methods=['POST'])
 def predict():
@@ -69,6 +79,13 @@ def predict():
 
     query = data["query"].lower().strip().replace("/", "")[:application.config['MAX_QUERY_LENGTH']]
     return _predict_or_retrieve(query)
+
+@application.route('/init', methods=['POST'])
+def init_model():
+    r = requests.post(application.config["GCF_URL"], json={ "query": ""}).json()
+    print(r)
+    return r
+
 
 def _save_brain_img(img_name, pred, mask):
     vol_data = np.zeros((46, 55, 46))
@@ -88,7 +105,7 @@ def _save_brain_img(img_name, pred, mask):
     return pred_img
 
 def _predict_or_retrieve(query):
-    try:
+    # try:
       existing_results = Result.query.filter_by(text=query)
       if existing_results.count() > 0:
         result = existing_results.first()
@@ -114,10 +131,14 @@ def _predict_or_retrieve(query):
 
       info = get_surface_object(pred_img)
 
-      return jsonify({"query": query, "surface_info": info, "related_articles": related_articles})
-    except Exception as err:
-      return {"error": "Unable to retrieve result: %s" % str(err)}
-
+      return jsonify({
+        "query": query,
+        "download_path": url_for("download", filename=img_name),
+        "surface_info": info,
+        "related_articles": related_articles
+      })
+    # except Exception as err:
+    #   return {"error": "Unable to retrieve result: %s" % str(err)}
 
 if __name__ == '__main__':
     application.debug = True
