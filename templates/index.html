@@ -34,6 +34,7 @@
       <div class="navbar__menu" id="navbar-menu">
         <span class="navbar__link navbar__link--selected" ng-click="scrollToTop()">Query</span>
         <span class="navbar__link" ng-click="scrollToHowItWorks()">How it works</span>
+        <span class="navbar__link" ng-click="scrollToAPI()">API</span>
         <span class="navbar__link navbar__link--right" ng-click="scrollToFeedback()">Feedback</span>
       </div>
       <div class="navbar__hamburger" id="navbar-hamburger" ng-click="toggleMenu()">
@@ -194,6 +195,78 @@
         <span class="how-it-works__list__bullet">3</span>Given a text query input, the text encoder produces an encoding vector, which is then reshaped and passed through the 3-D CNN to generate a brain image. During training, the model is optimized using back propagation from mean squared error (MSE) between the predicted and target brain images.
       </p>
       Huge thanks to all the neuroscienntists whose papers we have used and the authors of <a class="how-it-works__link" href="https://neurosynth.org/" target="_blank">Neurosynth</a> and <a class="how-it-works__link" href="https://neuroquery.org/" target="_blank">Neuroquery</a> for making their data public.
+      <p style="text-align: center">
+        <a class="how-it-works__link how-it-works__github__link" href="https://github.com/sabunculab/text2brain" target="_blank">
+          {% include "icon-github.svg" %} 
+          Model
+        </a>
+        <a class="how-it-works__link how-it-works__github__link" href="https://github.com/sabunculab/text2brain_server" target="_blank">
+          {% include "icon-github.svg" %} 
+          Website
+        </a>
+      </p>
+    </div>
+    
+    <div class="api" id="api">
+      <h1 class="api__title">API</h1>
+      <p class="api__text">
+        Prediction from our Text2Brain model can be retrieved programmatically via the <code class="api__inline-code">/api</code> endpoint via a POST request.
+        The endpoint expects a JSON of the format  <code class="api__inline-code">{ "query": "your-query-string" }</code>. Note that for query longer than 140 characters, the query will be truncated to 140 characters before being passed as input to Text2Brain.
+      </p>
+      <p class="api__text">
+        A successful response is a JSON with the following fields:
+           <ul class="api__list">
+             <li><code class="api__inline-code">query</code>: actual query passed to the model (might be different from the input query due to truncation)</li>
+             <li><code class="api__inline-code">download_path</code>: download path for the predicted brain volume in nii.gz format</li>
+             <li><code class="api__inline-code">related_articles</code>: array of 5 articles (in our training dataset) with the average activation map that best match the predicted brain image, measured by Pearson's correlation. Each entry array is a JSON with the following fields:</li>
+             <ul class="api__list">
+               <li><code class="api__inline-code">pmid</code>: PubMed ID of the article
+               <li><code class="api__inline-code">author</code>: authors of the article
+               <li><code class="api__inline-code">title</code>: Title of the article
+               <li><code class="api__inline-code">correlation</code>: per-voxel Pearson's correlation coefficient betwen the predicted brain image and the article's average activation map
+             </ul>
+           </ul>
+      </p>
+      <p class="api__text">
+        Example:
+        <div class="api__block-code__header">
+          </br> 
+        </div>
+        <div class="api__block-code">
+          <div class="api__block-code__inner">
+            <span class="api__block-code__bash">$</span>payload='{ "query": "kicking" }' </br>
+            <span class="api__block-code__bash">$</span>curl -H "Content-Type: application/json" </br>
+            <div class="api__block-code__inner"><div class="api__block-code__inner">-d "$payload" https://braininterpreter.com/api</div></div>
+          </div>
+        </div>
+        </br>
+
+        <div class="api__block-code__header">
+          RESPONSE
+        </div>
+        <div class="api__block-code">
+          <div class="api__block-code__inner">
+            { </br>
+              <div class="api__block-code__inner">
+                "download_path": "https://braininterpreter.com/download/fa4168...3319.nii.gz",</br>
+                "query": "working memory", </br>
+                "related_articles": [ </br>
+                <div class="api__block-code__inner">
+                  { </br>
+                    <div class="api__block-code__inner">
+                      "author": "Marie Arsalidou, Margot J. Taylor",  </br>
+                      "correlation": 0.630859375,  </br>
+                      "pmid": "20946958",  </br>
+                      "title": "Is 2+2=4? Meta-analyses of brain areas needed for numbers and calculations" </br>
+                    </div>
+                  }, </br>
+                  ... </br>
+                </div>
+              </div>
+            }
+         </div>
+        </div>
+      </p>
     </div>
     
     <div class="feedback" id="feedback">
@@ -205,7 +278,7 @@
               placeholder="Any feedback you have with the predicted brain maps or the website"></textarea>
           <div class="button-container button-container--right">
             <span ng-show="commentSuccess">Thank you! We have received your comment</span>
-            <button type="submit" class="submit-button submit-button--brainy" style="margin-right: 0" ng-disabled="commentLoading">
+            <button type="submit" class="submit-button submit-button--white" style="margin-right: 0" ng-disabled="commentLoading">
               Send
             </button>
           </div>
@@ -216,11 +289,11 @@
     <div class="how-it-works how-it-works__github">
       Built by <a class="how-it-works__link" href="https://github.com/ngohgia" target="_blank">Gia</a> and  <a class="how-it-works__link" href="https://github.com/mnhng" target="_blank">Minh</a>. Kudos to Zoe Tan for early iterations of the website.
       <p>
-        <a class="how-it-works__link how-it-works__github__link" href="https://github.com/ngohgia/text2brain" target="_blank">
+        <a class="how-it-works__link how-it-works__github__link" href="https://github.com/sabunculab/text2brain" target="_blank">
           {% include "icon-github.svg" %} 
           Model
         </a>
-        <a class="how-it-works__link how-it-works__github__link" href="https://github.com/ngohgia/text2brain_server" target="_blank">
+        <a class="how-it-works__link how-it-works__github__link" href="https://github.com/sabunculab/text2brain_server" target="_blank">
           {% include "icon-github.svg" %} 
           Website
         </a>

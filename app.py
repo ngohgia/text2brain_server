@@ -29,7 +29,7 @@ mask  = np.load(application.config['MASK_FILE'])
 
 LOCAL_OUTPUTS_DIR = application.config["OUTPUTS_DIR"]
 
-def get_surface_object(stat_map_img):
+def _get_surface_object(stat_map_img):
     stat_map_img = check_niimg_3d(stat_map_img)
     info = full_brain_info(
         volume_img=stat_map_img, mesh='fsaverage5', threshold="80%",
@@ -69,21 +69,25 @@ def create_comment():
     except Exception as err:
       return {"error": "Unable to add comment to database: %s" % str(err)}
 
-@application.route('/download/<string:filename>')
+@application.route('/download/<string:filename>', methods=['GET'])
 def download(filename):
-    return send_from_directory(LOCAL_OUTPUTS_DIR, "%s.nii.gz" % filename, as_attachment=True)
+    return send_from_directory(LOCAL_OUTPUTS_DIR, filename, as_attachment=True)
 
 @application.route('/predict', methods=['POST'])
 def predict():
     data = json.loads(request.data.decode())
 
-    query = data["query"].lower().strip().replace("/", "")[:application.config['MAX_QUERY_LENGTH']]
-    return _predict_or_retrieve(query)
+    return _predict_or_retrieve(data["query"])
+
+@application.route('/api', methods=['POST'])
+def api():
+    data = json.loads(request.data.decode())
+
+    return _predict_or_retrieve(data["query"], for_api=True)
 
 @application.route('/init', methods=['POST'])
 def init_model():
     r = requests.post(application.config["GCF_URL"], json={ "query": ""}).json()
-    print(r)
     return r
 
 
@@ -104,8 +108,10 @@ def _save_brain_img(img_name, pred, mask):
 
     return pred_img
 
-def _predict_or_retrieve(query):
-    # try:
+def _predict_or_retrieve(raw_query, for_api=False):
+    query = raw_query.lower().strip().replace("/", "")[:application.config['MAX_QUERY_LENGTH']]
+
+    try:
       existing_results = Result.query.filter_by(text=query)
       if existing_results.count() > 0:
         result = existing_results.first()
@@ -129,16 +135,19 @@ def _predict_or_retrieve(query):
         pred = np.asarray(r["result"])
         pred_img = _save_brain_img(img_name, pred, mask)
 
-      info = get_surface_object(pred_img)
-
-      return jsonify({
+      res ={
         "query": query,
-        "download_path": url_for("download", filename=img_name),
-        "surface_info": info,
+        "download_path": url_for("download", filename="%s.nii.gz" % img_name, _external=True),
         "related_articles": related_articles
-      })
-    # except Exception as err:
-    #   return {"error": "Unable to retrieve result: %s" % str(err)}
+      }
+
+      if not for_api:
+        info = _get_surface_object(pred_img)
+        res["surface_info"] = info
+    
+      return jsonify(res)
+    except Exception as err:
+      return {"error": "Unable to retrieve result: %s" % str(err)}
 
 if __name__ == '__main__':
     application.debug = True

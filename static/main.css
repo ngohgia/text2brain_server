@@ -118,6 +118,15 @@ body {
   position: relative;
 }
 
+.how-it-works,
+.feedback,
+.api {
+  box-sizing: border-box;
+  width: 100%;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
 .search-input-container {
   text-align: center;
 }
@@ -407,7 +416,8 @@ body {
 
 .how-it-works {
   background-color: rgb(244, 244, 244);
-  padding: 50px 15%;
+  padding-bottom: 50px;
+  padding-top: 50px;
   text-align: left;
   overflow: hidden;
 }
@@ -418,10 +428,10 @@ body {
   border-radius: 5px;
   margin-bottom: 20px;
   padding: 20px;
+}
 
-  > strong {
-    font-weight: 700 !important;
-  }
+.how-it-works__reference > strong {
+  font-weight: 700 !important;
 }
 
 .how-it-works__model {
@@ -441,7 +451,10 @@ body {
 }
 
 .how-it-works__github {
-  padding: 50px 20% 25px 20%;
+  background-color: white;
+  color: rgb(70, 70, 70);
+  padding-bottom: 25px;
+  padding-top: 50px;
   text-align: center;
 }
 
@@ -471,7 +484,9 @@ body {
 }
 
 .feedback {
-  padding: 50px 15% 30px 15%;
+  background-color: rgb(244, 244, 244);
+  padding-bottom: 30px;
+  padding-top: 50px;
   overflow: hidden;
 }
 
@@ -488,6 +503,54 @@ body {
   padding: 15px;
   width: 100%;
   resize: none;
+}
+
+.api {
+  padding-bottom: 50px;
+  padding-top: 50px;
+  text-align: left;
+}
+
+.api__title {
+  font-weight: 300;
+  font-size: 24px;
+  text-align: center;
+}
+
+.api__inline-code {
+  background-color: rgb(221, 221, 221);
+  border-radius: 5px;
+  box-sizing: border-box;
+  padding: 2px 5px;
+  width: 100;
+}
+
+.api__block-code__inner {
+  padding: 0 20px;
+  width: 100%;
+}
+
+.api__block-code__bash {
+  color: rgb(221, 221, 221);
+  padding-right: 20px;
+}
+
+.api__block-code__header {
+  background-color: rgb(221, 221, 221);
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  color: white;
+  padding: 5px 10px;
+}
+
+.api__block-code {
+  background-color: rgb(153, 153, 153);
+  border: solid 1px rgb(201, 201, 201);
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  color: white;
+  overflow: scroll;
+  padding: 10px 0;
 }
 
 @media (min-width: 768px) {
@@ -531,6 +594,13 @@ body {
 
   .container {
     font-size: 18px;
+    padding-left: 5%;
+    padding-right: 5%;
+  }
+
+  .how-it-works,
+  .feedback,
+  .api {
     padding-left: 5%;
     padding-right: 5%;
   }
@@ -601,7 +671,7 @@ body {
 
   .search {
     font-size: 24px;
-    padding-top: 100px;
+    padding-top: 60px;
     padding-left: 20%;
     padding-right: 20%;
   }
@@ -611,6 +681,14 @@ body {
     padding-left: 8%;
     padding-right: 8%;
   }
+
+  .how-it-works,
+  .feedback,
+  .api {
+    padding-left: 15%;
+    padding-right: 15%;
+  }
+
 
   .search-input {
     font-size: 24px;

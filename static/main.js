@@ -368,6 +368,11 @@ $(document).ready(
          el.scrollIntoView({behavior: "smooth"});
       }
 
+      $scope.scrollToAPI = function() {
+         let el = document.getElementById("api");
+         el.scrollIntoView({behavior: "smooth"});
+      }
+
       $scope.scrollToFeedback = function() {
          let el = document.getElementById("feedback");
          el.scrollIntoView({behavior: "smooth"});
