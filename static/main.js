@@ -1,3 +1,7 @@
+// Adopted from https://github.com/nilearn/nilearn/blob/main/nilearn/plotting/data/js/surface-plot-utils.js
+// and https://github.com/nilearn/nilearn/blob/main/nilearn/plotting/data/html/surface_plot_template.html
+// We are very grateful of the wonderful nilearn library. It rocks!
+
 function decodeBase64(encoded, dtype) {
 
     let getter = {
@@ -188,7 +192,6 @@ function decodeHemisphere(surfaceInfo, surface, hemisphere){
 
 }
 
-// Modified from https://github.com/nilearn/nilearn/blob/main/nilearn/plotting/data/html/surface_plot_template.html
 function makePlot(surfaceMapInfo, surface, hemisphere, surfacePlotId, viewSelectId, colorbarId, colorbarLegendId) {
     decodeHemisphere(surfaceMapInfo, surface, hemisphere);
     info = surfaceMapInfo[surface + "_" + hemisphere];
