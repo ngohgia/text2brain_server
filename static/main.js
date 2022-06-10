@@ -188,6 +188,7 @@ function decodeHemisphere(surfaceInfo, surface, hemisphere){
 
 }
 
+// Modified from https://github.com/nilearn/nilearn/blob/main/nilearn/plotting/data/html/surface_plot_template.html
 function makePlot(surfaceMapInfo, surface, hemisphere, surfacePlotId, viewSelectId, colorbarId, colorbarLegendId) {
     decodeHemisphere(surfaceMapInfo, surface, hemisphere);
     info = surfaceMapInfo[surface + "_" + hemisphere];
